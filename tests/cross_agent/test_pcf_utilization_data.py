@@ -30,7 +30,7 @@ _parameters = ",".join(_parameters_list)
 
 
 def _load_tests():
-    with open(FIXTURE, "r") as fh:
+    with open(FIXTURE) as fh:
         js = fh.read()
     return json.loads(js)
 
@@ -62,7 +62,7 @@ def test_pcf(testname, env_vars, expected_vendors_hash, expected_metrics):
 
     @validate_internal_metrics(metrics=metrics)
     def _test_pcf_data():
-        env_dict = dict([(key, val["response"]) for key, val in env_vars.items()])
+        env_dict = {key: val["response"] for key, val in env_vars.items()}
 
         with Environ(env_dict):
             data = PCFUtilization.detect()

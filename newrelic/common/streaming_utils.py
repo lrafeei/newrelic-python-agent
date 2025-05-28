@@ -147,7 +147,7 @@ class StreamBufferIterator:
 
 class SpanProtoAttrs(dict):
     def __init__(self, *args, **kwargs):
-        super(SpanProtoAttrs, self).__init__()
+        super().__init__()
         if args:
             arg = args[0]
             if len(args) > 1:
@@ -159,11 +159,11 @@ class SpanProtoAttrs(dict):
                 for k, v in arg:
                     self[k] = v
 
-        for k in kwargs:
-            self[k] = kwargs[k]
+        for k, v in kwargs.items():
+            self[k] = v
 
     def __setitem__(self, key, value):
-        super(SpanProtoAttrs, self).__setitem__(key, SpanProtoAttrs.get_attribute_value(value))
+        super().__setitem__(key, SpanProtoAttrs.get_attribute_value(value))
 
     def copy(self):
         copy = SpanProtoAttrs()

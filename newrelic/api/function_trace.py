@@ -28,7 +28,7 @@ class FunctionTrace(TimeTrace):
         if kwargs:
             raise TypeError("Invalid keyword arguments:", kwargs)
 
-        super(FunctionTrace, self).__init__(parent=parent, source=source)
+        super().__init__(parent=parent, source=source)
 
         # Handle incorrect groupings and leading slashes. This will
         # cause an empty segment which we want to avoid. In that case
@@ -55,7 +55,7 @@ class FunctionTrace(TimeTrace):
         return result
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} object at 0x{id(self):x} {dict(name=self.name, group=self.group, label=self.label, params=self.params, terminal=self.terminal, rollup=self.rollup)}>"
+        return f"<{self.__class__.__name__} object at 0x{id(self):x} { {'name': self.name, 'group': self.group, 'label': self.label, 'params': self.params, 'terminal': self.terminal, 'rollup': self.rollup} }>"
 
     def terminal_node(self):
         return self.terminal
@@ -131,7 +131,7 @@ def FunctionTraceWrapper(
 
         trace = FunctionTrace(_name, _group, _label, _params, terminal, rollup, parent=parent, source=wrapped)
 
-        if wrapper:  # pylint: disable=W0125,W0126
+        if wrapper:
             return wrapper(wrapped, trace)(*args, **kwargs)
 
         with trace:
@@ -150,7 +150,7 @@ def FunctionTraceWrapper(
 
         trace = FunctionTrace(_name, group, label, params, terminal, rollup, parent=parent, source=wrapped)
 
-        if wrapper:  # pylint: disable=W0125,W0126
+        if wrapper:
             return wrapper(wrapped, trace)(*args, **kwargs)
 
         with trace:

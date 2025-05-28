@@ -61,7 +61,7 @@ def create_request_class(app, method, url, headers=None, loop=None):
         from sanic.server import HttpProtocol
 
         class MockProtocol(HttpProtocol):
-            async def send(*args, **kwargs):  # pylint: disable=E0211
+            async def send(*args, **kwargs):
                 return
 
         proto = MockProtocol(loop=loop, app=app)
@@ -139,7 +139,7 @@ class TestApplication:
         return request(self.app, method, url, headers)
 
 
-@pytest.fixture()
+@pytest.fixture
 def app():
     from _target_application import app
 

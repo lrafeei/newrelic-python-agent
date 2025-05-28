@@ -28,7 +28,7 @@ class GraphQLOperationTrace(TimeTrace):
         if kwargs:
             raise TypeError("Invalid keyword arguments:", kwargs)
 
-        super(GraphQLOperationTrace, self).__init__(parent=parent, source=source)
+        super().__init__(parent=parent, source=source)
 
         self.operation_name = "<anonymous>"
         self.operation_type = "<unknown>"
@@ -39,7 +39,7 @@ class GraphQLOperationTrace(TimeTrace):
         self.product = "GraphQL"
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} object at 0x{id(self):x} {dict(operation_name=self.operation_name, operation_type=self.operation_type, deepest_path=self.deepest_path, graphql=self.graphql)}>"
+        return f"<{self.__class__.__name__} object at 0x{id(self):x} { {'operation_name': self.operation_name, 'operation_type': self.operation_type, 'deepest_path': self.deepest_path, 'graphql': self.graphql} }>"
 
     @property
     def formatted(self):
@@ -70,7 +70,7 @@ class GraphQLOperationTrace(TimeTrace):
         self.graphql = graphql = self.formatted[:limit]
         self._add_agent_attribute("graphql.operation.query", graphql)
 
-        return super(GraphQLOperationTrace, self).finalize_data(transaction, exc=None, value=None, tb=None)
+        return super().finalize_data(transaction, exc=None, value=None, tb=None)
 
     def create_node(self):
         return GraphQLOperationNode(
@@ -112,7 +112,7 @@ def GraphQLOperationTraceWrapper(wrapped, async_wrapper=None):
 
         trace = GraphQLOperationTrace(parent=parent, source=wrapped)
 
-        if wrapper:  # pylint: disable=W0125,W0126
+        if wrapper:
             return wrapper(wrapped, trace)(*args, **kwargs)
 
         with trace:
@@ -136,7 +136,7 @@ class GraphQLResolverTrace(TimeTrace):
         if kwargs:
             raise TypeError("Invalid keyword arguments:", kwargs)
 
-        super(GraphQLResolverTrace, self).__init__(parent=parent, source=source)
+        super().__init__(parent=parent, source=source)
 
         self.field_name = field_name
         self.field_parent_type = field_parent_type
@@ -145,10 +145,10 @@ class GraphQLResolverTrace(TimeTrace):
         self._product = None
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} object at 0x{id(self):x} {dict(field_name=self.field_name)}>"
+        return f"<{self.__class__.__name__} object at 0x{id(self):x} { {'field_name': self.field_name} }>"
 
     def __enter__(self):
-        super(GraphQLResolverTrace, self).__enter__()
+        super().__enter__()
         _ = self.product  # Cache product value
         return self
 
@@ -173,7 +173,7 @@ class GraphQLResolverTrace(TimeTrace):
         self._add_agent_attribute("graphql.field.returnType", self.field_return_type)
         self._add_agent_attribute("graphql.field.path", self.field_path)
 
-        return super(GraphQLResolverTrace, self).finalize_data(*args, **kwargs)
+        return super().finalize_data(*args, **kwargs)
 
     def create_node(self):
         return GraphQLResolverNode(
@@ -202,7 +202,7 @@ def GraphQLResolverTraceWrapper(wrapped, async_wrapper=None):
 
         trace = GraphQLResolverTrace(parent=parent, source=wrapped)
 
-        if wrapper:  # pylint: disable=W0125,W0126
+        if wrapper:
             return wrapper(wrapped, trace)(*args, **kwargs)
 
         with trace:

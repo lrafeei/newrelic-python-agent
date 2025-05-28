@@ -18,7 +18,6 @@ import sys
 from newrelic.api.application import application_instance
 from newrelic.api.transaction import current_transaction, record_log_event
 from newrelic.common.object_wrapper import wrap_function_wrapper
-from newrelic.common.package_version_utils import get_package_version_tuple
 from newrelic.common.signature import bind_args
 from newrelic.core.config import global_settings
 from newrelic.hooks.logger_logging import add_nr_linking_metadata
@@ -117,7 +116,7 @@ def nr_log_patcher(original_patcher=None):
                 record["message"] = add_nr_linking_metadata(message)
 
     if original_patcher is not None:
-        patchers = [p for p in original_patcher]  # Consumer iterable into list so we can modify
+        patchers = list(original_patcher)  # Consumer iterable into list so we can modify
         # Wipe out reference so patchers aren't called twice, as the framework will handle calling other patchers.
         original_patcher = None
     else:

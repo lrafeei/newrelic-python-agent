@@ -12,11 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import functools
-import sys
 import threading
 import time
-import types
 
 import newrelic.common.object_wrapper
 
@@ -43,7 +40,7 @@ class InternalTrace:
 
 class InternalTraceWrapper:
     def __init__(self, wrapped, name):
-        if type(wrapped) == type(()):
+        if type(wrapped) is tuple:
             (instance, wrapped) = wrapped
         else:
             instance = None

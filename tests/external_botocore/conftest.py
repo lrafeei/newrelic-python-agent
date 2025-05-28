@@ -83,9 +83,8 @@ def bedrock_server():
             yield client
     else:
         # Use real Bedrock backend and record responses
-        assert os.environ["AWS_ACCESS_KEY_ID"] and os.environ["AWS_SECRET_ACCESS_KEY"], (
-            "AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY are required."
-        )
+        assert os.environ["AWS_ACCESS_KEY_ID"], "AWS_ACCESS_KEY_ID is required."
+        assert os.environ["AWS_SECRET_ACCESS_KEY"], "AWS_SECRET_ACCESS_KEY is required."
 
         # Construct real client
         client = boto3.client("bedrock-runtime", "us-east-1")
@@ -104,7 +103,7 @@ def bedrock_server():
 
 
 # Intercept outgoing requests and log to file for mocking
-RECORDED_HEADERS = set(["x-amzn-requestid", "x-amzn-errortype", "content-type"])
+RECORDED_HEADERS = {"x-amzn-requestid", "x-amzn-errortype", "content-type"}
 
 
 def wrap_botocore_endpoint_Endpoint__do_get_response(wrapped, instance, args, kwargs):
@@ -160,6 +159,6 @@ def bind__do_get_response(request, operation_model, context):
 def wrap_botocore_eventstream_add_data(wrapped, instance, args, kwargs):
     bound_args = bind_args(wrapped, args, kwargs)
     data = bound_args["data"].hex()  # convert bytes to hex for storage
-    prompt = [k for k in BEDROCK_AUDIT_LOG_CONTENTS.keys()][-1]
+    prompt = list(BEDROCK_AUDIT_LOG_CONTENTS.keys())[-1]
     BEDROCK_AUDIT_LOG_CONTENTS[prompt][2].append(data)
     return wrapped(*args, **kwargs)

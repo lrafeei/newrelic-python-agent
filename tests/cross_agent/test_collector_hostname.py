@@ -29,7 +29,7 @@ _parameters = ",".join(_parameters_list)
 
 
 def _load_tests():
-    with open(FIXTURE, "r") as fh:
+    with open(FIXTURE) as fh:
         js = fh.read()
     return json.loads(js)
 
@@ -64,8 +64,8 @@ def _test_collector_hostname(
         if config_override_host:
             ini_contents += f"\nhost = {config_override_host}"
 
-        import newrelic.config as config
         import newrelic.core.config as core_config
+        from newrelic import config
 
         reload(core_config)
         reload(config)

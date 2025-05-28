@@ -381,6 +381,42 @@ RESPONSES_V1 = {
             "system_fingerprint": None,
         },
     ],
+    "You are a helpful assistant who generates a random first name. A user will pass in a first letter, and you should generate a name that starts with that first letter.": [
+        {
+            "Content-Type": "application/json",
+            "openai-model": "gpt-3.5-turbo-0613",
+            "openai-organization": "foobar-jtbczk",
+            "openai-processing-ms": "488",
+            "openai-version": "2020-10-01",
+            "x-ratelimit-limit-requests": "200",
+            "x-ratelimit-limit-tokens": "40000",
+            "x-ratelimit-limit-tokens_usage_based": "40000",
+            "x-ratelimit-remaining-requests": "199",
+            "x-ratelimit-remaining-tokens": "39921",
+            "x-ratelimit-remaining-tokens_usage_based": "39921",
+            "x-ratelimit-reset-requests": "7m12s",
+            "x-ratelimit-reset-tokens": "118ms",
+            "x-ratelimit-reset-tokens_usage_based": "118ms",
+            "x-request-id": "f3de99e17ccc360430cffa243b74dcbd",
+        },
+        200,
+        {
+            "id": "chatcmpl-8XEjOPNHth7yS2jt1You3fEwB6w9i",
+            "object": "chat.completion",
+            "created": 1702932142,
+            "model": "gpt-3.5-turbo-0613",
+            "choices": [
+                {
+                    "index": 0,
+                    "message": {"role": "assistant", "content": "Milo"},
+                    "logprobs": None,
+                    "finish_reason": "stop",
+                }
+            ],
+            "usage": {"prompt_tokens": 60, "completion_tokens": 9, "total_tokens": 69},
+            "system_fingerprint": None,
+        },
+    ],
     "9906": [
         {
             "content-type": "application/json",
@@ -450,7 +486,7 @@ def simple_get(openai_version, extract_shortened_prompt):
         if not prompt:
             self.send_response(500)
             self.end_headers()
-            self.wfile.write("Could not parse prompt.".encode("utf-8"))
+            self.wfile.write(b"Could not parse prompt.")
             return
 
         headers, response = ({}, "")
@@ -466,7 +502,7 @@ def simple_get(openai_version, extract_shortened_prompt):
         else:  # If no matches found
             self.send_response(500)
             self.end_headers()
-            self.wfile.write(f"Unknown Prompt:\n{prompt}".encode("utf-8"))
+            self.wfile.write(f"Unknown Prompt:\n{prompt}".encode())
             return
 
         # Send response code
@@ -501,7 +537,7 @@ def MockExternalOpenAIServer(simple_get):
         # calls.
 
         def __init__(self, handler=simple_get, port=None, *args, **kwargs):
-            super(_MockExternalOpenAIServer, self).__init__(handler=handler, port=port, *args, **kwargs)  # noqa: B026
+            super().__init__(handler=handler, port=port, *args, **kwargs)  # noqa: B026
 
     return _MockExternalOpenAIServer
 

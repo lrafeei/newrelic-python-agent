@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from collections import abc
-
 from newrelic.api.external_trace import ExternalTrace
 from newrelic.common.object_wrapper import wrap_function_wrapper
 
@@ -32,26 +30,26 @@ async def newrelic_event_hook_async(response):
         tracer.process_response(getattr(response, "status_code", None), headers)
 
 
-def newrelic_first_gen(l, is_async=False):
+def newrelic_first_gen(wrapped, is_async=False):
     if is_async:
         yield newrelic_event_hook_async
     else:
         yield newrelic_event_hook
     while True:
         try:
-            yield next(l)
+            yield next(wrapped)
         except StopIteration:
             break
 
 
 class NewRelicFirstList(list):
     def __init__(self, *args, is_async=False, **kwargs):
-        super(NewRelicFirstList, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.is_async = is_async
 
     def __iter__(self):
-        l = super().__iter__()
-        return iter(newrelic_first_gen(l, self.is_async))
+        wrapped_iter = super().__iter__()
+        return iter(newrelic_first_gen(wrapped_iter, self.is_async))
 
 
 class NewRelicFirstDict(dict):

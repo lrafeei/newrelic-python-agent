@@ -26,12 +26,7 @@ from newrelic.packages.wrapt import BoundFunctionWrapper as _BoundFunctionWrappe
 from newrelic.packages.wrapt import CallableObjectProxy as _CallableObjectProxy
 from newrelic.packages.wrapt import FunctionWrapper as _FunctionWrapper
 from newrelic.packages.wrapt import ObjectProxy as _ObjectProxy
-from newrelic.packages.wrapt import (  # noqa: F401; pylint: disable=W0611
-    apply_patch,
-    resolve_path,
-    wrap_object,
-    wrap_object_attribute,
-)
+from newrelic.packages.wrapt import apply_patch, resolve_path, wrap_object, wrap_object_attribute  # noqa: F401
 
 # We previously had our own pure Python implementation of the generic
 # object wrapper but we now defer to using the wrapt module as its C
@@ -65,21 +60,21 @@ class ObjectProxy(_ObjectProxy):
             name = name.replace("_nr_", "_self_", 1)
             setattr(self, name, value)
         else:
-            super(ObjectProxy, self).__setattr__(name, value)
+            super().__setattr__(name, value)
 
     def __getattr__(self, name):
         if name.startswith("_nr_"):
             name = name.replace("_nr_", "_self_", 1)
             return getattr(self, name)
         else:
-            return super(ObjectProxy, self).__getattr__(name)
+            return super().__getattr__(name)
 
     def __delattr__(self, name):
         if name.startswith("_nr_"):
             name = name.replace("_nr_", "_self_", 1)
             delattr(self, name)
         else:
-            super(ObjectProxy, self).__delattr__(name)
+            super().__delattr__(name)
 
     @property
     def _nr_next_object(self):
@@ -132,7 +127,7 @@ class ObjectWrapper(FunctionWrapper):
             DeprecationWarning,
             stacklevel=2,
         )
-        super(ObjectWrapper, self).__init__(wrapped, wrapper)
+        super().__init__(wrapped, wrapper)
 
 
 # Function for creating a decorator for applying to functions, as well as

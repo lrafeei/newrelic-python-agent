@@ -27,12 +27,12 @@ class MemcacheTrace(TimeTrace):
         if kwargs:
             raise TypeError("Invalid keyword arguments:", kwargs)
 
-        super(MemcacheTrace, self).__init__(parent=parent, source=source)
+        super().__init__(parent=parent, source=source)
 
         self.command = command
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} object at 0x{id(self):x} {dict(command=self.command)}>"
+        return f"<{self.__class__.__name__} object at 0x{id(self):x} { {'command': self.command} }>"
 
     def terminal_node(self):
         return True
@@ -71,7 +71,7 @@ def MemcacheTraceWrapper(wrapped, command, async_wrapper=None):
 
         trace = MemcacheTrace(_command, parent=parent, source=wrapped)
 
-        if wrapper:  # pylint: disable=W0125,W0126
+        if wrapper:
             return wrapper(wrapped, trace)(*args, **kwargs)
 
         with trace:

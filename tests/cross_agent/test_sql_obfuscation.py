@@ -29,7 +29,7 @@ _parameters = ",".join(_parameters_list)
 def load_tests():
     result = []
     path = os.path.join(JSON_DIR, "sql_obfuscation.json")
-    with open(path, "r") as fh:
+    with open(path) as fh:
         tests = json.load(fh)
 
     for test in tests:
@@ -49,7 +49,7 @@ _quoting_styles = {
 
 
 def get_quoting_styles(dialects):
-    return set([_quoting_styles.get(dialect) for dialect in dialects])
+    return {_quoting_styles.get(dialect) for dialect in dialects}
 
 
 class DummyDB:

@@ -42,17 +42,67 @@ AVAILABLE_TRANSPORTS = {
 }
 
 
+def bind_publish(
+    body,
+    routing_key=None,
+    delivery_mode=None,
+    mandatory=False,
+    immediate=False,
+    priority=0,
+    content_type=None,
+    content_encoding=None,
+    serializer=None,
+    headers=None,
+    compression=None,
+    exchange=None,
+    retry=False,
+    retry_policy=None,
+    declare=None,
+    expiration=None,
+    timeout=None,
+    confirm_timeout=None,
+    **properties,
+):
+    return {
+        "body": body,
+        "routing_key": routing_key,
+        "delivery_mode": delivery_mode,
+        "mandatory": mandatory,
+        "immediate": immediate,
+        "priority": priority,
+        "content_type": content_type,
+        "content_encoding": content_encoding,
+        "serializer": serializer,
+        "headers": headers,
+        "compression": compression,
+        "exchange": exchange,
+        "retry": retry,
+        "retry_policy": retry_policy,
+        "declare": declare,
+        "expiration": expiration,
+        "timeout": timeout,
+        "confirm_timeout": confirm_timeout,
+        "properties": properties,
+    }
+
+
 def wrap_Producer_publish(wrapped, instance, args, kwargs):
     transaction = current_transaction()
 
     if transaction is None:
         return wrapped(*args, **kwargs)
 
-    bound_args = bind_args(wrapped, args, kwargs)
+    try:
+        bound_args = bind_publish(*args, **kwargs)
+    except Exception:
+        _logger.debug(
+            "Unable to bind arguments for kombu.messaging.Producer.publish. Report this issue to New Relic support.",
+            record_exception=True,
+        )
+        return wrapped(*args, **kwargs)
+
     headers = bound_args["headers"]
     headers = headers if headers else {}
-    value = bound_args["body"]
-    key = bound_args["routing_key"]
     exchange = getattr(bound_args["exchange"], "name", None) or "Default"
 
     transaction.add_messagebroker_info("Kombu", get_package_version("kombu"))
@@ -143,7 +193,7 @@ def wrap_consumer_recieve_callback(wrapped, instance, args, kwargs):
                 routing_key=key,
                 source=wrapped,
             )
-            created_transaction.__enter__()  # pylint: disable=C2801
+            created_transaction.__enter__()
             created_transaction.destination_name = destination_name
 
             # Obtain consumer client_id to send up as agent attribute
@@ -205,7 +255,7 @@ def wrap_serialize(wrapped, instance, args, kwargs):
     group = "MessageBroker/Kombu/Exchange"
     name = f"Named/{exchange}/Serialization/Value"
 
-    with FunctionTrace(name=name, group=group) as ft:
+    with FunctionTrace(name=name, group=group):
         return wrapped(*args, **kwargs)
 
 

@@ -32,7 +32,7 @@ from _test_bedrock_chat_completion import (
     chat_completion_payload_templates,
     chat_completion_streaming_expected_events,
 )
-from conftest import BOTOCORE_VERSION  # pylint: disable=E0611
+from conftest import BOTOCORE_VERSION
 from testing_support.fixtures import override_llm_token_callback_settings, reset_core_stats_engine, validate_attributes
 from testing_support.ml_testing_utils import (
     add_token_count_to_events,
@@ -519,7 +519,7 @@ def test_bedrock_chat_completion_error_malformed_request_body(
     @background_task(name="test_bedrock_chat_completion")
     def _test():
         model = "amazon.titan-text-express-v1"
-        body = "{ Malformed Request Body".encode("utf-8")
+        body = b"{ Malformed Request Body"
         set_trace_info()
         add_custom_attribute("llm.conversation_id", "my-awesome-id")
         add_custom_attribute("llm.foo", "bar")
@@ -828,7 +828,7 @@ def test_chat_models_instrumented():
     models = [model["modelId"] for model in response["modelSummaries"]]
     not_supported = []
     for model in models:
-        is_supported = any([model.startswith(supported_model) for supported_model in SUPPORTED_MODELS])
+        is_supported = any(model.startswith(supported_model) for supported_model in SUPPORTED_MODELS)
         if not is_supported:
             not_supported.append(model)
 

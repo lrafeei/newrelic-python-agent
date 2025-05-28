@@ -19,18 +19,18 @@ from testing_support.validators.validate_tt_collector_json import validate_tt_co
 from newrelic.api.background_task import background_task
 
 
-@pytest.fixture()
+@pytest.fixture
 def sample_data(collection):
     doc = collection.document("document")
     doc.set({"x": 1})
     return doc
 
 
-@pytest.fixture()
+@pytest.fixture
 def exercise_client(client, sample_data):
     def _exercise_client():
-        assert len([_ for _ in client.collections()])
-        doc = [_ for _ in client.get_all([sample_data])][0]
+        assert list(client.collections())
+        doc = list(client.get_all([sample_data]))[0]
         assert doc.to_dict()["x"] == 1
 
     return _exercise_client

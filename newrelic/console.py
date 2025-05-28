@@ -67,7 +67,7 @@ def shell_command(wrapped):
         prototype = f"{wrapper.__name__[3:]} {doc_signature(wrapped)}"
 
         if hasattr(wrapper, "__doc__") and wrapper.__doc__ is not None:
-            wrapper.__doc__ = "\n".join((prototype, wrapper.__doc__.lstrip("\n")))  # noqa: flynt
+            wrapper.__doc__ = "\n".join((prototype, wrapper.__doc__.lstrip("\n")))
 
     return wrapper
 
@@ -366,8 +366,6 @@ class ConsoleShell(cmd.Cmd):
         interactive Python interpreter. Invoke 'exit()' or 'quit()' to
         escape the interpreter session."""
 
-        enabled = False
-
         _settings = global_settings()
 
         if not _settings.console.allow_interpreter_cmd:
@@ -442,7 +440,7 @@ class ConnectionManager:
             pass
 
     def __thread_run(self):
-        if type(self.__listener_socket) == type(()):
+        if type(self.__listener_socket) is tuple:
             listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             listener.bind(self.__listener_socket)

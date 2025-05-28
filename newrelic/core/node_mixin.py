@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import newrelic.core.attribute as attribute
+from newrelic.core import attribute
 from newrelic.core.attribute_filter import DST_SPAN_EVENTS, DST_TRANSACTION_SEGMENTS
 
 
@@ -76,7 +76,7 @@ class GenericNodeMixin:
         yield self.span_event(settings, base_attrs=base_attrs, parent_guid=parent_guid, attr_class=attr_class)
 
         for child in self.children:
-            for event in child.span_events(
+            for event in child.span_events(  # noqa: UP028
                 settings, base_attrs=base_attrs, parent_guid=self.guid, attr_class=attr_class
             ):
                 yield event
@@ -110,21 +110,35 @@ class DatastoreNodeMixin(GenericNodeMixin):
 
     def span_event(self, *args, **kwargs):
         self.agent_attributes["db.instance"] = self.db_instance
-        attrs = super(DatastoreNodeMixin, self).span_event(*args, **kwargs)
+        attrs = super().span_event(*args, **kwargs)
         i_attrs = attrs[0]
         a_attrs = attrs[2]
 
         i_attrs["category"] = "datastore"
-        i_attrs["component"] = self.product
         i_attrs["span.kind"] = "client"
 
+        if self.product:
+            i_attrs["component"] = a_attrs["db.system"] = attribute.process_user_attribute("db.system", self.product)[1]
+        if self.operation:
+            a_attrs["db.operation"] = attribute.process_user_attribute("db.operation", self.operation)[1]
+        if self.target:
+            a_attrs["db.collection"] = attribute.process_user_attribute("db.collection", self.target)[1]
+
         if self.instance_hostname:
-            _, a_attrs["peer.hostname"] = attribute.process_user_attribute("peer.hostname", self.instance_hostname)
+            peer_hostname = attribute.process_user_attribute("peer.hostname", self.instance_hostname)[1]
         else:
-            a_attrs["peer.hostname"] = "Unknown"
+            peer_hostname = "Unknown"
 
-        peer_address = f"{self.instance_hostname or 'Unknown'}:{self.port_path_or_id or 'Unknown'}"
+        a_attrs["peer.hostname"] = a_attrs["server.address"] = peer_hostname
 
-        _, a_attrs["peer.address"] = attribute.process_user_attribute("peer.address", peer_address)
+        peer_address = f"{peer_hostname}:{self.port_path_or_id or 'Unknown'}"
+
+        a_attrs["peer.address"] = attribute.process_user_attribute("peer.address", peer_address)[1]
+
+        # Attempt to treat port_path_or_id as an integer, fallback to not including it
+        try:
+            a_attrs["server.port"] = int(self.port_path_or_id)
+        except Exception:
+            pass
 
         return attrs

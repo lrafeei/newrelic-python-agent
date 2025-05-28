@@ -200,7 +200,7 @@ def _nr_aiohttp_wrap_system_route_(wrapped, instance, args, kwargs):
 
 class HeaderProxy(ObjectProxy):
     def __init__(self, wrapped, nr_headers):
-        super(HeaderProxy, self).__init__(wrapped)
+        super().__init__(wrapped)
         self._nr_headers = nr_headers
 
     def items(self):
@@ -286,7 +286,7 @@ def _nr_aiohttp_request_wrapper_(wrapped, instance, args, kwargs):
             return response
         except Exception as e:
             try:
-                trace.process_response_headers(e.headers.items())  # pylint: disable=E1101
+                trace.process_response_headers(e.headers.items())
             except:
                 pass
 

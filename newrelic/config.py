@@ -68,7 +68,7 @@ sys.meta_path.insert(0, newrelic.api.import_hook.ImportHookFinder())
 # This will be used to validate what is provided and issue warnings
 # if feature flags not in set are provided.
 
-_FEATURE_FLAGS = set(["django.instrumentation.inclusion-tags.r1"])
+_FEATURE_FLAGS = {"django.instrumentation.inclusion-tags.r1"}
 
 # Names of configuration file and deployment environment. This
 # will be overridden by the load_configuration() function when
@@ -504,6 +504,11 @@ def _process_configuration(section):
     _process_setting(section, "k8s_operator.enabled", "getboolean", None)
     _process_setting(section, "azure_operator.enabled", "getboolean", None)
     _process_setting(section, "package_reporting.enabled", "getboolean", None)
+    _process_setting(section, "instrumentation.graphql.capture_introspection_queries", "getboolean", None)
+    _process_setting(
+        section, "instrumentation.kombu.ignored_exchanges", "get", newrelic.core.config.parse_space_separated_into_list
+    )
+    _process_setting(section, "instrumentation.kombu.consumer.enabled", "getboolean", None)
 
 
 # Loading of configuration from specified file and for specified
@@ -1159,7 +1164,7 @@ def _process_module_configuration():
 
 def _module_function_glob(module, object_path):
     """Match functions and class methods in a module to file globbing syntax."""
-    if not any((c in object_path for c in ("*", "?", "["))):  # Identify globbing patterns
+    if not any(c in object_path for c in ("*", "?", "[")):  # Identify globbing patterns
         return (object_path,)  # Returned value must be iterable
     else:
         # Gather module functions
@@ -2004,6 +2009,8 @@ def _process_module_builtin_defaults():
         "openai.resources.completions", "newrelic.hooks.mlmodel_openai", "instrument_openai_resources_chat_completions"
     )
     _process_module_definition("openai._base_client", "newrelic.hooks.mlmodel_openai", "instrument_openai_base_client")
+
+    _process_module_definition("google.genai.models", "newrelic.hooks.mlmodel_gemini", "instrument_genai_models")
 
     _process_module_definition(
         "asyncio.base_events", "newrelic.hooks.coroutines_asyncio", "instrument_asyncio_base_events"
@@ -3062,14 +3069,29 @@ def _process_module_builtin_defaults():
     _process_module_definition(
         "elasticsearch.client", "newrelic.hooks.datastore_elasticsearch", "instrument_elasticsearch_client"
     )
+    _process_module_definition(
+        "elasticsearch._async.client",
+        "newrelic.hooks.datastore_elasticsearch",
+        "instrument_elasticsearch__async_client",
+    )
     # v8 and above
     _process_module_definition(
         "elasticsearch._sync.client", "newrelic.hooks.datastore_elasticsearch", "instrument_elasticsearch_client_v8"
+    )
+    _process_module_definition(
+        "elasticsearch._async.client",
+        "newrelic.hooks.datastore_elasticsearch",
+        "instrument_elasticsearch__async_client_v8",
     )
 
     # v7 and below
     _process_module_definition(
         "elasticsearch.client.cat", "newrelic.hooks.datastore_elasticsearch", "instrument_elasticsearch_client_cat"
+    )
+    _process_module_definition(
+        "elasticsearch._async.client.cat",
+        "newrelic.hooks.datastore_elasticsearch",
+        "instrument_elasticsearch__async_client_cat",
     )
     # v8 and above
     _process_module_definition(
@@ -3084,18 +3106,27 @@ def _process_module_builtin_defaults():
         "newrelic.hooks.datastore_elasticsearch",
         "instrument_elasticsearch_client_cluster",
     )
+    _process_module_definition(
+        "elasticsearch._async.client.cluster",
+        "newrelic.hooks.datastore_elasticsearch",
+        "instrument_elasticsearch__async_client_cluster",
+    )
     # v8 and above
     _process_module_definition(
         "elasticsearch._sync.client.cluster",
         "newrelic.hooks.datastore_elasticsearch",
         "instrument_elasticsearch_client_cluster_v8",
     )
-
     # v7 and below
     _process_module_definition(
         "elasticsearch.client.indices",
         "newrelic.hooks.datastore_elasticsearch",
         "instrument_elasticsearch_client_indices",
+    )
+    _process_module_definition(
+        "elasticsearch._async.client.indices",
+        "newrelic.hooks.datastore_elasticsearch",
+        "instrument_elasticsearch__async_client_indices",
     )
     # v8 and above
     _process_module_definition(
@@ -3103,10 +3134,14 @@ def _process_module_builtin_defaults():
         "newrelic.hooks.datastore_elasticsearch",
         "instrument_elasticsearch_client_indices_v8",
     )
-
     # v7 and below
     _process_module_definition(
         "elasticsearch.client.nodes", "newrelic.hooks.datastore_elasticsearch", "instrument_elasticsearch_client_nodes"
+    )
+    _process_module_definition(
+        "elasticsearch._async.client.nodes",
+        "newrelic.hooks.datastore_elasticsearch",
+        "instrument_elasticsearch__async_client_nodes",
     )
     # v8 and above
     _process_module_definition(
@@ -3121,6 +3156,11 @@ def _process_module_builtin_defaults():
         "newrelic.hooks.datastore_elasticsearch",
         "instrument_elasticsearch_client_snapshot",
     )
+    _process_module_definition(
+        "elasticsearch._async.client.snapshot",
+        "newrelic.hooks.datastore_elasticsearch",
+        "instrument_elasticsearch__async_client_snapshot",
+    )
     # v8 and above
     _process_module_definition(
         "elasticsearch._sync.client.snapshot",
@@ -3131,6 +3171,11 @@ def _process_module_builtin_defaults():
     # v7 and below
     _process_module_definition(
         "elasticsearch.client.tasks", "newrelic.hooks.datastore_elasticsearch", "instrument_elasticsearch_client_tasks"
+    )
+    _process_module_definition(
+        "elasticsearch._async.client.tasks",
+        "newrelic.hooks.datastore_elasticsearch",
+        "instrument_elasticsearch__async_client_tasks",
     )
     # v8 and above
     _process_module_definition(
@@ -3145,6 +3190,11 @@ def _process_module_builtin_defaults():
         "newrelic.hooks.datastore_elasticsearch",
         "instrument_elasticsearch_client_ingest",
     )
+    _process_module_definition(
+        "elasticsearch._async.client.ingest",
+        "newrelic.hooks.datastore_elasticsearch",
+        "instrument_elasticsearch__async_client_ingest",
+    )
     # v8 and above
     _process_module_definition(
         "elasticsearch._sync.client.ingest",
@@ -3158,22 +3208,42 @@ def _process_module_builtin_defaults():
         "newrelic.hooks.datastore_elasticsearch",
         "instrument_elasticsearch_connection_base",
     )
+    _process_module_definition(
+        "elasticsearch._async.http_aiohttp",
+        "newrelic.hooks.datastore_elasticsearch",
+        "instrument_async_elasticsearch_connection_base",
+    )
     # v8 and above
     _process_module_definition(
         "elastic_transport._node._base",
         "newrelic.hooks.datastore_elasticsearch",
         "instrument_elastic_transport__node__base",
     )
+    _process_module_definition(
+        "elastic_transport._node._base_async",
+        "newrelic.hooks.datastore_elasticsearch",
+        "instrument_async_elastic_transport__node__base",
+    )
 
     # v7 and below
     _process_module_definition(
         "elasticsearch.transport", "newrelic.hooks.datastore_elasticsearch", "instrument_elasticsearch_transport"
+    )
+    _process_module_definition(
+        "elasticsearch._async.transport",
+        "newrelic.hooks.datastore_elasticsearch",
+        "instrument_async_elasticsearch_transport",
     )
     # v8 and above
     _process_module_definition(
         "elastic_transport._transport",
         "newrelic.hooks.datastore_elasticsearch",
         "instrument_elastic_transport__transport",
+    )
+    _process_module_definition(
+        "elastic_transport._async_transport",
+        "newrelic.hooks.datastore_elasticsearch",
+        "instrument_async_elastic_transport__transport",
     )
 
     _process_module_definition("pika.adapters", "newrelic.hooks.messagebroker_pika", "instrument_pika_adapters")
@@ -3273,8 +3343,16 @@ def _process_module_builtin_defaults():
         "redis.commands.bf.commands", "newrelic.hooks.datastore_redis", "instrument_redis_commands_bf_commands"
     )
 
+    # Redis version <6.0
     _process_module_definition(
         "redis.commands.graph.commands", "newrelic.hooks.datastore_redis", "instrument_redis_commands_graph_commands"
+    )
+
+    # Added in Redis v6.0+
+    _process_module_definition(
+        "redis.commands.vectorset.commands",
+        "newrelic.hooks.datastore_redis",
+        "instrument_redis_commands_vectorset_commands",
     )
 
     _process_module_definition(

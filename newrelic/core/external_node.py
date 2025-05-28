@@ -15,8 +15,8 @@
 import urllib.parse as urlparse
 from collections import namedtuple
 
-import newrelic.core.attribute as attribute
 import newrelic.core.trace_node
+from newrelic.core import attribute
 from newrelic.core.metric import TimeMetric
 from newrelic.core.node_mixin import GenericNodeMixin
 
@@ -171,7 +171,7 @@ class ExternalNode(_ExternalNode, GenericNodeMixin):
 
     def span_event(self, *args, **kwargs):
         self.agent_attributes["http.url"] = self.http_url
-        attrs = super(ExternalNode, self).span_event(*args, **kwargs)
+        attrs = super().span_event(*args, **kwargs)
         i_attrs = attrs[0]
 
         i_attrs["category"] = "http"

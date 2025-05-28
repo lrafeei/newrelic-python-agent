@@ -61,7 +61,7 @@ class DatastoreTrace(TimeTrace):
         if kwargs:
             raise TypeError("Invalid keyword arguments:", kwargs)
 
-        super(DatastoreTrace, self).__init__(parent=parent, source=source)
+        super().__init__(parent=parent, source=source)
 
         self.instance_reporting_enabled = False
         self.database_name_enabled = False
@@ -75,7 +75,7 @@ class DatastoreTrace(TimeTrace):
         self.database_name = database_name
 
     def __enter__(self):
-        result = super(DatastoreTrace, self).__enter__()
+        result = super().__enter__()
         if result and self.transaction:
             transaction = self.transaction
 
@@ -92,7 +92,7 @@ class DatastoreTrace(TimeTrace):
         return result
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} object at 0x{id(self):x} {dict(product=self.product, target=self.target, operation=self.operation, host=self.host, port_path_or_id=self.port_path_or_id, database_name=self.database_name)}>"
+        return f"<{self.__class__.__name__} object at 0x{id(self):x} { {'product': self.product, 'target': self.target, 'operation': self.operation, 'host': self.host, 'port_path_or_id': self.port_path_or_id, 'database_name': self.database_name} }>"
 
     def finalize_data(self, transaction, exc=None, value=None, tb=None):
         if not self.instance_reporting_enabled:
@@ -226,7 +226,7 @@ def DatastoreTraceWrapper(
             _product, _target, _operation, _host, _port_path_or_id, _database_name, parent=parent, source=wrapped
         )
 
-        if wrapper:  # pylint: disable=W0125,W0126
+        if wrapper:
             return wrapper(wrapped, trace)(*args, **kwargs)
 
         with trace:

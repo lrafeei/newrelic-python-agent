@@ -19,7 +19,7 @@ import botocore.errorfactory
 import botocore.eventstream
 import botocore.exceptions
 import pytest
-from conftest import BOTOCORE_VERSION  # pylint: disable=E0611
+from conftest import BOTOCORE_VERSION
 from external_botocore._test_bedrock_chat_completion import (
     chat_completion_expected_events,
     chat_completion_expected_malformed_request_body_events,
@@ -505,14 +505,14 @@ def invoke_model_malformed_request_body(loop, bedrock_server, response_streaming
         with pytest.raises(_client_error):
             if response_streaming:
                 await bedrock_server.invoke_model_with_response_stream(
-                    body="{ Malformed Request Body".encode("utf-8"),
+                    body=b"{ Malformed Request Body",
                     modelId="amazon.titan-text-express-v1",
                     accept="application/json",
                     contentType="application/json",
                 )
             else:
                 await bedrock_server.invoke_model(
-                    body="{ Malformed Request Body".encode("utf-8"),
+                    body=b"{ Malformed Request Body",
                     modelId="amazon.titan-text-express-v1",
                     accept="application/json",
                     contentType="application/json",
@@ -854,7 +854,7 @@ def test_bedrock_chat_completion_functions_marked_as_wrapped_for_sdk_compatibili
     assert bedrock_server._nr_wrapped
 
 
-def test_chat_models_instrumented():
+def test_chat_models_instrumented(loop):
     import aiobotocore
 
     SUPPORTED_MODELS = [model for model, _, _, _ in MODEL_EXTRACTORS if "embed" not in model]
@@ -872,7 +872,7 @@ def test_chat_models_instrumented():
         models = [model["modelId"] for model in response["modelSummaries"]]
         not_supported = []
         for model in models:
-            is_supported = any([model.startswith(supported_model) for supported_model in SUPPORTED_MODELS])
+            is_supported = any(model.startswith(supported_model) for supported_model in SUPPORTED_MODELS)
             if not is_supported:
                 not_supported.append(model)
 

@@ -69,7 +69,7 @@ class DatabaseTrace(TimeTrace):
         if kwargs:
             raise TypeError("Invalid keyword arguments:", kwargs)
 
-        super(DatabaseTrace, self).__init__(parent=parent, source=source)
+        super().__init__(parent=parent, source=source)
 
         self.sql = sql
 
@@ -84,13 +84,13 @@ class DatabaseTrace(TimeTrace):
         self.database_name = database_name
 
     def __enter__(self):
-        result = super(DatabaseTrace, self).__enter__()
+        result = super().__enter__()
         if result and self.transaction:
             self.sql = self.transaction._intern_string(self.sql)
         return result
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} object at 0x{id(self):x} {dict(sql=self.sql, dbapi2_module=self.dbapi2_module)}>"
+        return f"<{self.__class__.__name__} object at 0x{id(self):x} { {'sql': self.sql, 'dbapi2_module': self.dbapi2_module} }>"
 
     @property
     def is_async_mode(self):
@@ -249,7 +249,7 @@ def DatabaseTraceWrapper(wrapped, sql, dbapi2_module=None, async_wrapper=None):
 
         trace = DatabaseTrace(_sql, dbapi2_module, parent=parent, source=wrapped)
 
-        if wrapper:  # pylint: disable=W0125,W0126
+        if wrapper:
             return wrapper(wrapped, trace)(*args, **kwargs)
 
         with trace:

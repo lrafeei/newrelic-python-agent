@@ -79,7 +79,7 @@ class ApdexStats(list):
     # be the apdex_t value in use at the time.
 
     def __init__(self, satisfying=0, tolerating=0, frustrating=0, apdex_t=0.0):
-        super(ApdexStats, self).__init__([satisfying, tolerating, frustrating, apdex_t, apdex_t, 0])
+        super().__init__([satisfying, tolerating, frustrating, apdex_t, apdex_t, 0])
 
     satisfying = property(operator.itemgetter(0))
     tolerating = property(operator.itemgetter(1))
@@ -124,7 +124,7 @@ class TimeStats(list):
     ):
         if total_exclusive_call_time is None:
             total_exclusive_call_time = total_call_time
-        super(TimeStats, self).__init__(
+        super().__init__(
             [call_count, total_call_time, total_exclusive_call_time, min_call_time, max_call_time, sum_of_squares]
         )
 
@@ -329,7 +329,7 @@ class DimensionalMetrics:
 
 class SlowSqlStats(list):
     def __init__(self):
-        super(SlowSqlStats, self).__init__([0, 0, 0, 0, None])
+        super().__init__([0, 0, 0, 0, None])
 
     call_count = property(operator.itemgetter(0))
     total_call_time = property(operator.itemgetter(1))
@@ -415,7 +415,7 @@ class SampledDataSet:
         # Always sample if under capacity
         return True
 
-    def add(self, sample, priority=None):  # pylint: disable=E0202
+    def add(self, sample, priority=None):
         self.num_seen += 1
 
         if priority is None:
@@ -448,7 +448,7 @@ class SampledDataSet:
 
 class LimitedDataSet(list):
     def __init__(self, capacity=200):
-        super(LimitedDataSet, self).__init__()
+        super().__init__()
 
         self.capacity = capacity
         self.num_seen = 0
@@ -479,7 +479,7 @@ class LimitedDataSet(list):
         self.clear()
         self.num_seen = 0
 
-    def add(self, sample):  # pylint: disable=E0202
+    def add(self, sample):
         if self.should_sample():
             self.append(sample)
         self.num_seen += 1
@@ -1337,7 +1337,7 @@ class StatsEngine:
             )
 
         for key, value in normalized_stats.items():
-            key = dict(name=key[0], scope=key[1])
+            key = {"name": key[0], "scope": key[1]}
             result.append((key, value))
 
         return result

@@ -17,7 +17,7 @@ from io import BytesIO
 
 import botocore.exceptions
 import pytest
-from conftest import BOTOCORE_VERSION  # pylint: disable=E0611
+from conftest import BOTOCORE_VERSION
 from external_botocore._test_bedrock_embeddings import (
     embedding_expected_events,
     embedding_expected_malformed_request_body_events,
@@ -362,7 +362,7 @@ def test_bedrock_embedding_error_malformed_request_body(loop, bedrock_server, se
 
     async def _test():
         model = "amazon.titan-embed-g1-text-02"
-        body = "{ Malformed Request Body".encode("utf-8")
+        body = b"{ Malformed Request Body"
         set_trace_info()
         add_custom_attribute("llm.conversation_id", "my-awesome-id")
         add_custom_attribute("llm.foo", "bar")
@@ -411,7 +411,7 @@ def test_bedrock_embedding_error_malformed_response_body(loop, bedrock_server, s
     loop.run_until_complete(_test())
 
 
-def test_embedding_models_instrumented():
+def test_embedding_models_instrumented(loop):
     import aiobotocore
 
     SUPPORTED_MODELS = [model for model, _, _, _ in MODEL_EXTRACTORS if "embed" in model]
@@ -429,7 +429,7 @@ def test_embedding_models_instrumented():
         models = [model["modelId"] for model in response["modelSummaries"]]
         not_supported = []
         for model in models:
-            is_supported = any([model.startswith(supported_model) for supported_model in SUPPORTED_MODELS])
+            is_supported = any(model.startswith(supported_model) for supported_model in SUPPORTED_MODELS)
             if not is_supported:
                 not_supported.append(model)
 

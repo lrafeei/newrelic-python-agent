@@ -37,7 +37,7 @@ from newrelic.core.attribute_filter import AttributeFilter
 try:
     import grpc
 
-    from newrelic.core.infinite_tracing_pb2 import Span  # pylint: disable=W0611,C0412  # noqa: F401
+    from newrelic.core.infinite_tracing_pb2 import Span  # noqa: F401
 except Exception:
     grpc = None
 
@@ -553,7 +553,7 @@ def _environ_as_bool(name, default=False):
     flag = os.environ.get(name, default)
     if default is None or default:
         try:
-            flag = not flag.lower() in ["off", "false", "0"]
+            flag = flag.lower() not in ["off", "false", "0"]
         except AttributeError:
             pass
     else:
@@ -892,8 +892,16 @@ _settings.infinite_tracing.batching = _environ_as_bool("NEW_RELIC_INFINITE_TRACI
 _settings.infinite_tracing.ssl = True
 _settings.infinite_tracing.span_queue_size = _environ_as_int("NEW_RELIC_INFINITE_TRACING_SPAN_QUEUE_SIZE", 10000)
 
-_settings.instrumentation.graphql.capture_introspection_queries = os.environ.get(
-    "NEW_RELIC_INSTRUMENTATION_GRAPHQL_CAPTURE_INTROSPECTION_QUERIES", False
+_settings.instrumentation.graphql.capture_introspection_queries = _environ_as_bool(
+    "NEW_RELIC_INSTRUMENTATION_GRAPHQL_CAPTURE_INTROSPECTION_QUERIES", default=False
+)
+
+# celeryev is the monitoring queue for rabbitmq which we do not need to monitor-it just makes a lot of noise.
+_settings.instrumentation.kombu.ignored_exchanges = parse_space_separated_into_list(
+    os.environ.get("NEW_RELIC_INSTRUMENTATION_KOMBU_IGNORED_EXCHANGES", "celeryev")
+)
+_settings.instrumentation.kombu.consumer.enabled = _environ_as_bool(
+    "NEW_RELIC_INSTRUMENTATION_KOMBU_CONSUMER_ENABLED", default=False
 )
 
 # celeryev is the monitoring queue for rabbitmq which we do not need to monitor-it just makes a lot of noise.
@@ -998,9 +1006,9 @@ _settings.application_logging.forwarding.custom_attributes = _environ_as_mapping
 _settings.application_logging.forwarding.labels.enabled = _environ_as_bool(
     "NEW_RELIC_APPLICATION_LOGGING_FORWARDING_LABELS_ENABLED", default=False
 )
-_settings.application_logging.forwarding.labels.exclude = set(
+_settings.application_logging.forwarding.labels.exclude = {
     v.lower() for v in _environ_as_set("NEW_RELIC_APPLICATION_LOGGING_FORWARDING_LABELS_EXCLUDE", default="")
-)
+}
 
 _settings.application_logging.forwarding.context_data.enabled = _environ_as_bool(
     "NEW_RELIC_APPLICATION_LOGGING_FORWARDING_CONTEXT_DATA_ENABLED", default=False

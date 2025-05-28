@@ -66,9 +66,19 @@ from newrelic.core.trace_cache import TraceCacheActiveTraceError, TraceCacheNoAc
 _logger = logging.getLogger(__name__)
 
 DISTRIBUTED_TRACE_KEYS_REQUIRED = ("ty", "ac", "ap", "tr", "ti")
-DISTRIBUTED_TRACE_TRANSPORT_TYPES = set(
-    ("HTTP", "HTTPS", "Kafka", "JMS", "IronMQ", "AMQP", "Queue", "SQS", "REDIS", "ZooKeeper", "Other")
-)
+DISTRIBUTED_TRACE_TRANSPORT_TYPES = {
+    "HTTP",
+    "HTTPS",
+    "Kafka",
+    "JMS",
+    "IronMQ",
+    "AMQP",
+    "Queue",
+    "SQS",
+    "REDIS",
+    "ZooKeeper",
+    "Other",
+}
 DELIMITER_FORMAT_RE = re.compile("[ \t]*,[ \t]*")
 ACCEPTED_DISTRIBUTED_TRACE = 1
 CREATED_DISTRIBUTED_TRACE = 2
@@ -77,7 +87,7 @@ PARENT_TYPE = {"0": "App", "1": "Browser", "2": "Mobile"}
 
 class Sentinel(TimeTrace):
     def __init__(self, transaction):
-        super(Sentinel, self).__init__(None)
+        super().__init__(None)
         self.transaction = transaction
 
         # Set the thread id to the same as the transaction
@@ -109,7 +119,7 @@ class Sentinel(TimeTrace):
             self.exited = True
 
     @staticmethod
-    def complete_trace():  # pylint: disable=arguments-differ
+    def complete_trace():
         pass
 
     @property
@@ -743,7 +753,7 @@ class Transaction:
         hash.
 
         """
-        return sorted(set(self._alternate_path_hashes.values()) - set([self.path_hash]))
+        return sorted(set(self._alternate_path_hashes.values()) - {self.path_hash})
 
     @property
     def path_hash(self):
@@ -1075,16 +1085,16 @@ class Transaction:
             return
 
         self._compute_sampled_and_priority()
-        data = dict(
-            ty="App",
-            ac=account_id,
-            ap=application_id,
-            tr=self.trace_id,
-            sa=self.sampled,
-            pr=self.priority,
-            tx=self.guid,
-            ti=int(time.time() * 1000.0),
-        )
+        data = {
+            "ty": "App",
+            "ac": account_id,
+            "ap": application_id,
+            "tr": self.trace_id,
+            "sa": self.sampled,
+            "pr": self.priority,
+            "tx": self.guid,
+            "ti": int(time.time() * 1000.0),
+        }
 
         if account_id != trusted_account_key:
             data["tk"] = trusted_account_key

@@ -28,7 +28,7 @@ class ExternalTrace(CatHeaderMixin, TimeTrace):
         if kwargs:
             raise TypeError("Invalid keyword arguments:", kwargs)
 
-        super(ExternalTrace, self).__init__(parent=parent, source=source)
+        super().__init__(parent=parent, source=source)
 
         self.library = library
         self.url = url
@@ -36,7 +36,7 @@ class ExternalTrace(CatHeaderMixin, TimeTrace):
         self.params = {}
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} object at 0x{id(self):x} {dict(library=self.library, url=self.url, method=self.method)}>"
+        return f"<{self.__class__.__name__} object at 0x{id(self):x} { {'library': self.library, 'url': self.url, 'method': self.method} }>"
 
     def process_response(self, status_code, headers):
         self._add_agent_attribute("http.statusCode", status_code)
@@ -92,7 +92,7 @@ def ExternalTraceWrapper(wrapped, library, url, method=None, async_wrapper=None)
 
         trace = ExternalTrace(library, _url, _method, parent=parent, source=wrapped)
 
-        if wrapper:  # pylint: disable=W0125,W0126
+        if wrapper:
             return wrapper(wrapped, trace)(*args, **kwargs)
 
         with trace:
@@ -109,7 +109,7 @@ def ExternalTraceWrapper(wrapped, library, url, method=None, async_wrapper=None)
 
         trace = ExternalTrace(library, url, method, parent=parent, source=wrapped)
 
-        if wrapper:  # pylint: disable=W0125,W0126
+        if wrapper:
             return wrapper(wrapped, trace)(*args, **kwargs)
 
         with trace:

@@ -25,7 +25,7 @@ def sample_data(collection):
         collection.add({"x": x}, f"doc{x}")
 
 
-@pytest.fixture()
+@pytest.fixture
 def exercise_transaction_commit(client, collection):
     def _exercise_transaction_commit():
         from google.cloud.firestore_v1.transaction import transactional
@@ -33,27 +33,27 @@ def exercise_transaction_commit(client, collection):
         @transactional
         def _exercise(transaction):
             # get a DocumentReference
-            [_ for _ in transaction.get(collection.document("doc1"))]
+            list(transaction.get(collection.document("doc1")))
 
             # get a Query
             query = collection.select("x").where(field_path="x", op_string=">", value=2)
-            assert len([_ for _ in transaction.get(query)]) == 1
+            assert len(list(transaction.get(query))) == 1
 
             # get_all on a list of DocumentReferences
             all_docs = transaction.get_all([collection.document(f"doc{x}") for x in range(1, 4)])
-            assert len([_ for _ in all_docs]) == 3
+            assert len(list(all_docs)) == 3
 
             # set and delete methods
             transaction.set(collection.document("doc2"), {"x": 0})
             transaction.delete(collection.document("doc3"))
 
         _exercise(client.transaction())
-        assert len([_ for _ in collection.list_documents()]) == 2
+        assert len(list(collection.list_documents())) == 2
 
     return _exercise_transaction_commit
 
 
-@pytest.fixture()
+@pytest.fixture
 def exercise_transaction_rollback(client, collection):
     def _exercise_transaction_rollback():
         from google.cloud.firestore_v1.transaction import transactional
@@ -67,7 +67,7 @@ def exercise_transaction_rollback(client, collection):
 
         with pytest.raises(RuntimeError):
             _exercise(client.transaction())
-        assert len([_ for _ in collection.list_documents()]) == 3
+        assert len(list(collection.list_documents())) == 3
 
     return _exercise_transaction_rollback
 

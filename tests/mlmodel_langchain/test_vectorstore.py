@@ -89,12 +89,10 @@ vectorstore_recorded_events = [
 ]
 
 
-_test_vectorstore_modules_instrumented_ignored_classes = set(
-    [
-        "VectorStore",  # Base class
-        "Zilliz",  # Inherited from Milvus, which we are already instrumenting.
-    ]
-)
+_test_vectorstore_modules_instrumented_ignored_classes = {
+    "VectorStore",  # Base class
+    "Zilliz",  # Inherited from Milvus, which we are already instrumenting.
+}
 
 
 # Test to check if all classes containing "similarity_search"
@@ -373,8 +371,8 @@ def test_vectorstore_error(set_trace_info, embedding_openai_client, loop):
 )
 @background_task()
 def test_vectorstore_error_no_content(set_trace_info, embedding_openai_client):
+    set_trace_info()
     with pytest.raises(AssertionError):
-        set_trace_info()
         script_dir = os.path.dirname(__file__)
         loader = PyPDFLoader(os.path.join(script_dir, "hello.pdf"))
         docs = loader.load()

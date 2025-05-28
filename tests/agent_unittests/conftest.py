@@ -44,7 +44,7 @@ sys.modules["grpc"] = object()
 sys.modules["newrelic.core.infinite_tracing_pb2"] = FakeProtos
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def global_settings(request, monkeypatch):
     ini_contents = request.getfixturevalue("ini")
 
@@ -56,8 +56,8 @@ def global_settings(request, monkeypatch):
         for k, v in env.items():
             monkeypatch.setenv(k, v)
 
-    import newrelic.config as config  # pylint: disable=R0402
-    import newrelic.core.config as core_config  # pylint: disable=R0402
+    import newrelic.core.config as core_config
+    from newrelic import config
 
     original = {}
     for attr in dir(core_config):

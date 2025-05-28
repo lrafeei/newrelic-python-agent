@@ -34,7 +34,7 @@ class MessageTrace(CatHeaderMixin, TimeTrace):
         if kwargs:
             raise TypeError("Invalid keyword arguments:", kwargs)
 
-        super(MessageTrace, self).__init__(parent=parent, source=source)
+        super().__init__(parent=parent, source=source)
 
         self.terminal = terminal
 
@@ -47,7 +47,7 @@ class MessageTrace(CatHeaderMixin, TimeTrace):
         self.destination_name = destination_name
 
     def __enter__(self):
-        result = super(MessageTrace, self).__enter__()
+        result = super().__enter__()
 
         if result and self.transaction:
             self.library = self.transaction._intern_string(self.library)
@@ -64,7 +64,7 @@ class MessageTrace(CatHeaderMixin, TimeTrace):
         return result
 
     def __repr__(self):
-        return f"<{self.__class__.__name__} object at 0x{id(self):x} {dict(library=self.library, operation=self.operation)}>"
+        return f"<{self.__class__.__name__} object at 0x{id(self):x} { {'library': self.library, 'operation': self.operation} }>"
 
     def terminal_node(self):
         return self.terminal
@@ -145,7 +145,7 @@ def MessageTraceWrapper(
             source=wrapped,
         )
 
-        if wrapper:  # pylint: disable=W0125,W0126
+        if wrapper:
             return wrapper(wrapped, trace)(*args, **kwargs)
 
         with trace:

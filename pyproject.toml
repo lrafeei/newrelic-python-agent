@@ -1,3 +1,17 @@
+# Copyright 2010 New Relic, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 [tool.ruff]
 output-format = "grouped"
 line-length = 120
@@ -19,12 +33,12 @@ pep8-naming.extend-ignore-names = ["X", "y"]
 
 select = [
     # Enabled linters and rules
-    # "F",  # Pyflakes
-    # "E",  # pycodestyle
+    "E",  # pycodestyle
+    "F",  # Pyflakes
     "W",  # pycodestyle
     "I",  # isort
     # "N",  # pep8-naming
-    # "UP",  # pyupgrade
+    "UP",  # pyupgrade
     "YTT",  # flake8-2020
     "ASYNC",  # flake8-async
     "S",  # flake8-bandit
@@ -33,7 +47,7 @@ select = [
     "B",  # flake8-bugbear
     "A",  # flake8-builtins
     "COM",  # flake8-commas
-    # "C4",  # flake8-comprehensions
+    "C4",  # flake8-comprehensions
     "DTZ",  # flake8-datetimez
     "T10",  # flake8-debugger
     # "EM",  # flake8-errmsg
@@ -43,13 +57,12 @@ select = [
     "ICN",  # flake8-import-conventions
     "LOG",  # flake8-logging
     "G",  # flake8-logging-format
-    # "INP",  # flake8-no-pep420
+    "INP",  # flake8-no-pep420
     "PYI",  # flake8-pyi
-    # "PT",  # flake8-pytest-style
+    "PT",  # flake8-pytest-style
     "Q",  # flake8-quotes
     "RSE",  # flake8-raise
     # "RET",  # flake8-return
-    # "SLF",  # flake8-self
     "SLOT",  # flake8-slots
     # "SIM",  # flake8-simplify
     "TID",  # flake8-tidy-imports
@@ -57,7 +70,7 @@ select = [
     # "ARG",  # flake8-unused-arguments
     # "PTH",  # flake8-use-pathlib
     "PGH",  # pygrep-hooks
-    # "PL",  # Pylint
+    "PL",  # Pylint
     # "TRY",  # tryceratops
     "FLY",  # flynt
     "PERF",  # Perflint
@@ -72,6 +85,7 @@ select = [
 # "DJ",  # flake8-django
 # "PIE",  # flake8-pie
 # "T20",  # flake8-print
+# "SLF",  # flake8-self
 # "TC",  # flake8-type-checking
 # "TD",  # flake8-todos
 # "FIX",  # flake8-fixme
@@ -87,14 +101,22 @@ select = [
 
 ignore = [
     # Temporarily disabled rules
-    "RUF100",  # unused-noqa (TODO: remove this once all linters are enabled)
     "PERF203",  # try-except-in-loop (most of these are unavoidable)
     "S110",  # try-except-pass (Bandit wants us to log the exception, which is usually pointless. Spot check these later)
+    "PLW0603",  # global-statement (this is currently used extensively)
+    "PLW2901",  # redefined-loop-name (frequently used, not generally an issue)
+    "PLR",  # Pylint Recommendations (too many to fix all at once)
+    "E722",  # bare-except (too many to fix all at once)
+    "PT012",  # pytest-raises-with-multiple-statements (too many to fix all at once)
     # Permanently disabled rules
+    "UP006",  # non-pep585-annotation (not compatible with Python 3.7 or 3.8)
     "D203",  # incorrect-blank-line-before-class
     "D213",  # multi-line-summary-second-line
     "ARG001",  # unused-argument
     "PYI024",  # collections-named-tuple (not currently using type annotations)
+    "PLR0913", # too-many-arguments
+    "PLR0915",  # too-many-statements
+    "E501",  # line-too-long (line length handled by formatter)
     # Ruff recommended linter rules to disable when using formatter
     "W191",  # tab-indentation
     "E111",  # indentation-with-invalid-multiple
@@ -114,11 +136,17 @@ ignore = [
 "tests/*" = [
     # Disabled rules in tests
     "S",  # flake8-bandit (security checks are not necessary in tests)
+    "INP",  # flake8-no-pep420 (tests need not be not part of a package)
     "F401",  # unused-import
     "F811",  # redefined-while-unused (pytest fixtures trigger this)
+    "F841",  # unused-variable (intentional in tests to document what an unused output is)
+    "E731",  # lambda-assignment (acceptable in tests)
     "PLR2004",  # magic-value-comparison (comparing to constant values)
     "ASYNC251",  # blocking-sleep-in-async-function (acceptable in tests)
     "B904",  # raise-without-from-inside-except (not necessary in tests)
+    "PT006",  # pytest-parametrize-names-wrong-type (style choice)
+    "PT007",  # pytest-parametrize-values-wrong-type (style choice)
+    "PT011",  # pytest-raises-too-broad (we frequently test for generic errors)
 ]
 "newrelic/admin/*" = [
     # Disabled rules in admin scripts

@@ -216,7 +216,7 @@ def test_distributed_trace_attrs_omitted():
 @pytest.mark.parametrize("has_parent", (True, False))
 def test_distributed_tracing_metrics(web_transaction, gen_error, has_parent):
     def _make_dt_tag(pi):
-        return "%s/%s/%s/%s/all" % tuple(pi[x] for x in parent_order)
+        return "{}/{}/{}/{}/all".format(*tuple(pi[x] for x in parent_order))
 
     # figure out which metrics we'll see based on the test params
     # note: we'll always see DurationByCaller if the distributed
@@ -236,7 +236,7 @@ def test_distributed_tracing_metrics(web_transaction, gen_error, has_parent):
         tag = _make_dt_tag(parent_info)
     else:
         # tag = _make_dt_tag(dict((x, "Unknown") for x in parent_order))
-        tag = _make_dt_tag(dict((x, "Unknown") for x in parent_info.keys()))
+        tag = _make_dt_tag(dict.fromkeys(parent_info.keys(), "Unknown"))
         del dt_payload["d"]["tr"]
 
     # now run the test

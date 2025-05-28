@@ -1,3 +1,17 @@
+# Copyright 2010 New Relic, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 ---
 # MegaLinter GitHub Action configuration file
 # More info at https://megalinter.io
@@ -21,7 +35,7 @@ concurrency:
 jobs:
   megalinter:
     name: MegaLinter
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       # Give the default GITHUB_TOKEN write permission to commit and push, comment issues & post new PR
       # Remove the ones you do not need
@@ -41,7 +55,7 @@ jobs:
         id: ml
         # You can override MegaLinter flavor used to have faster performances
         # More info at https://megalinter.io/flavors/
-        uses: oxsecurity/megalinter/flavors/python@146333030da68e2e58c6ff826633824fabe01eaf # 8.5.0
+        uses: oxsecurity/megalinter/flavors/python@5a91fb06c83d0e69fbd23756d47438aa723b4a5a # 8.7.0
         env:
           # All available variables are described in documentation
           # https://megalinter.io/configuration/
@@ -56,7 +70,7 @@ jobs:
       # Upload MegaLinter artifacts
       - name: Archive production artifacts
         if: success() || failure()
-        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # 4.6.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # 4.6.2
         with:
           name: MegaLinter reports
           path: |
@@ -69,7 +83,7 @@ jobs:
         run: sudo chown -Rc $UID .git/
       - name: Commit and push applied linter fixes
         if: steps.ml.outputs.has_updated_sources == 1 && (env.APPLY_FIXES_EVENT == 'all' || env.APPLY_FIXES_EVENT == github.event_name) && env.APPLY_FIXES_MODE == 'commit' && github.ref != 'refs/heads/main' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.head_commit.message, 'skip fix')
-        uses: stefanzweifel/git-auto-commit-action@e348103e9026cc0eee72ae06630dbe30c8bf7a79 # 5.1.0
+        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # 5.2.0
         with:
           branch: ${{ github.event.pull_request.head.ref || github.head_ref || github.ref }}
           commit_message: "[MegaLinter] Apply linters fixes"

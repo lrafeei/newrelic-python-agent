@@ -26,7 +26,7 @@ FIXTURE = os.path.join(CURRENT_DIR, "fixtures", "labels.json")
 
 
 def _load_tests():
-    with open(FIXTURE, "r") as fh:
+    with open(FIXTURE) as fh:
         js = fh.read()
     return json.loads(js)
 
@@ -34,7 +34,7 @@ def _load_tests():
 def _parametrize_test(test):
     # pytest.mark.parametrize expects each test to be a tuple
 
-    return tuple([test["name"], test["labelString"], test["warning"], test["expected"]])
+    return (test["name"], test["labelString"], test["warning"], test["expected"])
 
 
 _labels_tests = [_parametrize_test(t) for t in _load_tests()]

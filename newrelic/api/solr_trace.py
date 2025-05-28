@@ -25,15 +25,13 @@ class SolrTrace(newrelic.api.time_trace.TimeTrace):
         if kwargs:
             raise TypeError("Invalid keyword arguments:", kwargs)
 
-        super(SolrTrace, self).__init__(parent=parent, source=source)
+        super().__init__(parent=parent, source=source)
 
         self.library = library
         self.command = command
 
     def __repr__(self):
-        return (
-            f"<{self.__class__.__name__} object at 0x{id(self):x} {dict(library=self.library, command=self.command)}>"
-        )
+        return f"<{self.__class__.__name__} object at 0x{id(self):x} { {'library': self.library, 'command': self.command} }>"
 
     def terminal_node(self):
         return True

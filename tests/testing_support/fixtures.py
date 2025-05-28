@@ -51,7 +51,7 @@ def _environ_as_bool(name, default=False):
     flag = os.environ.get(name, default)
     if default is None or default:
         try:
-            flag = not flag.lower() in ["off", "false", "0"]
+            flag = flag.lower() not in ["off", "false", "0"]
         except AttributeError:
             pass
     else:
@@ -76,8 +76,8 @@ def initialize_agent(app_name=None, default_settings=None):
         settings.developer_mode = True
         settings.license_key = "DEVELOPERMODELICENSEKEY"
 
-    settings.startup_timeout = float(os.environ.get("NEW_RELIC_STARTUP_TIMEOUT", 20.0))
-    settings.shutdown_timeout = float(os.environ.get("NEW_RELIC_SHUTDOWN_TIMEOUT", 20.0))
+    settings.startup_timeout = float(os.environ.get("NEW_RELIC_STARTUP_TIMEOUT", "20.0"))
+    settings.shutdown_timeout = float(os.environ.get("NEW_RELIC_SHUTDOWN_TIMEOUT", "20.0"))
 
     # Disable the harvest thread during testing so that harvest is explicitly
     # called on test shutdown
@@ -160,7 +160,7 @@ def capture_harvest_errors():
             metric_name.startswith("Supportability/Python/Harvest/Exception")
             and not metric_name.endswith("DiscardDataForRequest")
             and not metric_name.endswith("RetryDataForRequest")
-            and not metric_name.endswith(("newrelic.packages.urllib3.exceptions:ClosedPoolError"))
+            and not metric_name.endswith("newrelic.packages.urllib3.exceptions:ClosedPoolError")
         ):
             exc_info = sys.exc_info()
             queue.put(exc_info)
@@ -247,17 +247,14 @@ def collector_agent_registration_fixture(
             except Exception:
                 _logger.exception("Unable to record deployment marker.")
 
-        def finalize():
-            shutdown_agent()
+        yield application
 
-        request.addfinalizer(finalize)
-
-        return application
+        shutdown_agent()
 
     return _collector_agent_registration_fixture
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def collector_available_fixture(request, collector_agent_registration):
     application = application_instance()
     active = application.active
@@ -734,15 +731,13 @@ def validate_error_event_sample_data(required_attrs=None, required_user_attrs=Tr
     return _validate_error_event_sample_data
 
 
-SYNTHETICS_INTRINSIC_ATTR_NAMES = set(
-    [
-        "nr.syntheticsResourceId",
-        "nr.syntheticsJobId",
-        "nr.syntheticsMonitorId",
-        "nr.syntheticsType",
-        "nr.syntheticsInitiator",
-    ]
-)
+SYNTHETICS_INTRINSIC_ATTR_NAMES = {
+    "nr.syntheticsResourceId",
+    "nr.syntheticsJobId",
+    "nr.syntheticsMonitorId",
+    "nr.syntheticsType",
+    "nr.syntheticsInitiator",
+}
 
 
 def _validate_event_attributes(intrinsics, user_attributes, required_intrinsics, required_user):
@@ -964,7 +959,7 @@ def dt_enabled(wrapped, instance, args, kwargs):
     wrapped = override_application_settings(settings)(wrapped)
     wrapped = force_sampled(wrapped)
 
-    return wrapped(*args, **kwargs)  # pylint: disable=E1102
+    return wrapped(*args, **kwargs)
 
 
 @function_wrapper
@@ -1377,9 +1372,9 @@ class TerminatingPopen(subprocess.Popen):
         self.terminate()
 
 
-@pytest.fixture()
+@pytest.fixture
 def newrelic_caplog(caplog):
     logger = logging.getLogger("newrelic")
     logger.propagate = True
 
-    yield caplog
+    return caplog

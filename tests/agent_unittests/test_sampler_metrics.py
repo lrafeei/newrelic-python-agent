@@ -46,7 +46,7 @@ def cpu_data_source():
 @pytest.fixture
 def memory_data_source():
     sampler = memory_usage_data_source(settings=())["factory"](environ=())
-    yield sampler
+    return sampler
 
 
 PID = os.getpid()
@@ -86,7 +86,7 @@ def test_gc_metrics_collection(gc_data_source, top_object_count_limit):
     )
     def _test():
         gc.collect()
-        metrics_table = set(m[0] for m in (gc_data_source() or ()))
+        metrics_table = {m[0] for m in (gc_data_source() or ())}
 
         for metric in EXPECTED_GC_METRICS:
             assert metric in metrics_table
@@ -126,7 +126,7 @@ EXPECTED_CPU_METRICS = (
 
 
 def test_cpu_metrics_collection(cpu_data_source):
-    metrics_table = set(m[0] for m in (cpu_data_source() or ()))
+    metrics_table = {m[0] for m in (cpu_data_source() or ())}
 
     for metric in EXPECTED_CPU_METRICS:
         assert metric in metrics_table
@@ -144,7 +144,7 @@ EXPECTED_MEMORY_METRICS = (
 def test_memory_metrics_collection(memory_data_source, enabled):
     @override_generic_settings(settings, {"memory_runtime_pid_metrics.enabled": enabled})
     def _test():
-        metrics_table = set(m[0] for m in (memory_data_source() or ()))
+        metrics_table = {m[0] for m in (memory_data_source() or ())}
         if enabled:
             for metric in EXPECTED_MEMORY_METRICS:
                 assert metric in metrics_table
