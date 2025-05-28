@@ -157,7 +157,7 @@ class AWSUtilization(CommonUtilization):
     EXPECTED_KEYS = ("availabilityZone", "instanceId", "instanceType")
     METADATA_HOST = "169.254.169.254"
     METADATA_PATH = "/latest/dynamic/instance-identity/document"
-    METADATA_TOKEN_PATH = "/latest/api/token"  # nosec: B105
+    METADATA_TOKEN_PATH = "/latest/api/token"  # noqa: S105
     HEADERS = {"X-aws-ec2-metadata-token-ttl-seconds": "21600"}
     VENDOR_NAME = "aws"
 
@@ -211,28 +211,29 @@ class AzureFunctionUtilization(CommonUtilization):
     METADATA_HOST = "169.254.169.254"
     METADATA_PATH = "/metadata/instance/compute"
     METADATA_QUERY = {"api-version": "2017-03-01"}
-    EXPECTED_KEYS = ("faas_app_name", "cloud_region")
+    EXPECTED_KEYS = ("faas.app_name", "cloud.region")
     HEADERS = {"Metadata": "true"}
     VENDOR_NAME = "azurefunction"
 
-    SUBSCRIPTION_ID_RE = re.compile(r"^[^\+]")  # Take everything prior to the first plus sign
-    RESOURCE_GROUP_NAME_PATTERN = r"\+([a-zA-Z0-9\-]+)-[a-zA-Z0-9]+(?:-Linux)?"
-
     @staticmethod
-    def fetch(cls):
-        cloud_region = os.environ.get("REGION_NAME", "")
+    def fetch():
+        cloud_region = os.environ.get("REGION_NAME")
+        website_owner_name = os.environ.get("WEBSITE_OWNER_NAME")
+        azure_function_app_name = os.environ.get("WEBSITE_SITE_NAME")
 
-        website_owner_name = os.environ.get("WEBSITE_OWNER_NAME", "")
-        subscription_id = cls.SUBSCRIPTION_ID_RE.match(website_owner_name)
-        resource_group_name = os.environ.get(
-            "WEBSITE_RESOURCE_GROUP", re.search(cls.RESOURCE_GROUP_NAME_PATTERN, website_owner_name).group(0)
-        )
-        azure_function_app_name = os.environ.get("WEBSITE_SITE_NAME", "")
-        faas_app_name = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Web/sites/{2}".format(
-            subscription_id, resource_group_name, azure_function_app_name
-        )
-
-        return (faas_app_name, cloud_region)
+        if all((cloud_region, website_owner_name, azure_function_app_name)):
+            if website_owner_name.endswith("-Linux"):
+                resource_group_name = re.search(r"\+([a-zA-z0-9\-]+)-[a-zA-Z0-9]+(?:-Linux)", website_owner_name).group(
+                    1
+                )
+            else:
+                resource_group_name = re.search(r"\+([a-zA-z0-9\-]+)-[a-zA-Z0-9]+", website_owner_name).group(1)
+            subscription_id = re.search(r"(?:(?!\+).)*", website_owner_name).group(0)
+            faas_app_name = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Web/sites/{2}".format(
+                subscription_id, resource_group_name, azure_function_app_name
+            )
+            # Only send if all values are present
+            return (faas_app_name, cloud_region)
 
     @classmethod
     def get_values(cls, response):
