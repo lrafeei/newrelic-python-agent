@@ -53,6 +53,7 @@ jobs:
       - rediscluster
       - solr
       - valkey
+      - azurefunctions
 
     steps:
       - name: Success
@@ -181,12 +182,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -230,12 +231,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -293,12 +294,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -357,12 +358,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -421,12 +422,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -488,12 +489,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -555,12 +556,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -658,12 +659,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -720,12 +721,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -784,12 +785,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -846,12 +847,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -909,12 +910,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -983,12 +984,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -1045,12 +1046,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -1107,12 +1108,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -1174,12 +1175,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -1238,12 +1239,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -1303,12 +1304,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -1372,12 +1373,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -1434,12 +1435,12 @@ jobs:
       - name: Configure pip cache
         run: |
           mkdir -p /github/home/.cache/pip
-          chown -R $(whoami) /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
 
       - name: Get Environments
         id: get-envs
         run: |
-          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> $GITHUB_OUTPUT
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
         env:
           GROUP_NUMBER: ${{ matrix.group-number }}
 
@@ -1456,3 +1457,61 @@ jobs:
           name: coverage-${{ github.job }}-${{ strategy.job-index }}
           path: ./**/.coverage.*
           retention-days: 1
+
+  azurefunctions:
+    env:
+      TOTAL_GROUPS: 1
+
+    strategy:
+      fail-fast: false
+      matrix:
+        group-number: [1]
+
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/newrelic/newrelic-python-agent-ci:latest
+      options: >-
+        --add-host=host.docker.internal:host-gateway
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # 4.1.1
+
+      - name: Install azure-core-tools
+        run: |
+          wget -q https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb && \
+          sudo dpkg -i packages-microsoft-prod.deb && \
+          sudo apt-get update && \
+          sudo apt-get install azure-functions-core-tools-4
+
+      - name: Fetch git tags
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git fetch --tags origin
+
+      - name: Configure pip cache
+        run: |
+          mkdir -p /github/home/.cache/pip
+          chown -R "$(whoami)" /github/home/.cache/pip
+
+      - name: Get Environments
+        id: get-envs
+        run: |
+          echo "envs=$(tox -l | grep '^${{ github.job }}\-' | ./.github/workflows/get-envs.py)" >> "$GITHUB_OUTPUT"
+        env:
+          GROUP_NUMBER: ${{ matrix.group-number }}
+
+      - name: Test
+        run: |
+          tox -vv -e ${{ steps.get-envs.outputs.envs }} -p auto
+        env:
+          TOX_PARALLEL_NO_SPINNER: 1
+          PY_COLORS: 0
+
+      - name: Upload Coverage Artifacts
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # 4.3.1
+        with:
+          name: coverage-${{ github.job }}-${{ strategy.job-index }}
+          path: ./**/.coverage.*
+          retention-days: 1
+
