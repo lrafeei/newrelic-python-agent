@@ -12,44 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# import pytest
 import os
 import requests
 import subprocess
 import socket
 import time
-from testing_support.db_settings import azurefunction_settings
-
-# from testing_support.validators.validate_transaction_metrics import (
-#     validate_transaction_metrics,
-# )
-
-DB_SETTINGS = azurefunction_settings()[0]
-AZURE_HOST = DB_SETTINGS["host"]
-# AZURE_PORT = DB_SETTINGS["port"]
-
-
-# Metric checks example:
-# INSTANCE_METRIC_HOST = system_info.gethostname() if MONGODB_HOST == "127.0.0.1" else MONGODB_HOST
-# INSTANCE_METRIC_NAME = f"Datastore/instance/MongoDB/{INSTANCE_METRIC_HOST}/{MONGODB_PORT}"
-
-# @validate_transaction_metrics(
-#     "test_application:test_ping",
-#     group="AzureFunction",
-#     # scoped_metrics=_test_application_index_scoped_metrics
-# )
-# @web_transaction(name="test_application:test_ping", group="AzureFunction")
-# def old_test_ping():
-#     response = requests.get(f"http://{AZURE_HOST}:{AZURE_PORT}/basic?user=Reli")
-#     assert response.status_code == 200
-#     assert response.text == "Hello, Reli!"
-#     assert response.headers["Content-Type"] == "text/plain"
 
 
 def azure_start():
     nr_env = os.environ.copy()
     nr_env["NEW_RELIC_STARTUP_TIMEOUT"] = "10.0"
-    # breakpoint()
     # Start the Azure Function app using subprocess
     cur_dir = os.path.dirname(os.path.abspath(__file__))
     cmd = ["func", "start"]

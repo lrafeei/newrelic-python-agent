@@ -42,7 +42,7 @@ async def wrap_dispatcher__handle__invocation_request(wrapped, instance, args, k
 
     # Logic to determine if this is a cold start since we are not
     # able to access the logic in the __init__ method of the Dispatcher
-    # class with Python (in the Portal, this is done in C#)
+    # class with Python (in the Portal, this is not done in Python)
     if not hasattr(instance, "_nr_running_dispatcher"):
         instance._nr_running_dispatcher = True
         instance._nr_cold_start = True
