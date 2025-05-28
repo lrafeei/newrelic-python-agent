@@ -58,11 +58,7 @@ except ImportError:
 
 from distutils.command.build_ext import build_ext
 from distutils.core import Extension
-from distutils.errors import (
-    CCompilerError,
-    DistutilsExecError,
-    DistutilsPlatformError,
-)
+from distutils.errors import CCompilerError, DistutilsExecError, DistutilsPlatformError
 
 
 def newrelic_agent_guess_next_version(tag_version):
@@ -89,7 +85,7 @@ script_directory = os.path.dirname(__file__)
 if not script_directory:
     script_directory = os.getcwd()
 
-readme_file = os.path.join(script_directory, "README.rst")
+readme_file = os.path.join(script_directory, "README.md")
 
 if sys.platform == "win32" and python_version > (2, 6):
     build_ext_errors = (CCompilerError, DistutilsExecError, DistutilsPlatformError, IOError)
@@ -164,9 +160,10 @@ kwargs = dict(
         "git_describe_command": "git describe --dirty --tags --long --match *.*.*",
         "write_to": "newrelic/version.txt",
     },
-    setup_requires=["setuptools_scm>=3.2,<9"],
+    setup_requires=["setuptools_scm>=3.2,<8.1"],
     description="New Relic Python Agent",
     long_description=open(readme_file).read(),
+    long_description_content_type="text/markdown",
     url="https://docs.newrelic.com/docs/apm/agents/python-agent/",
     project_urls={"Source": "https://github.com/newrelic/newrelic-python-agent"},
     author="New Relic",
