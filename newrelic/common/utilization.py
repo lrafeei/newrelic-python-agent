@@ -26,7 +26,8 @@ from newrelic.packages import urllib3
 
 _logger = logging.getLogger(__name__)
 VALID_CHARS_RE = re.compile(r"[0-9a-zA-Z_ ./-]")
-
+AZURE_RESOURCE_GROUP_NAME_RE = re.compile(r"\+([a-zA-Z0-9\-]+)-[a-zA-Z0-9]+(?:-Linux)")
+AZURE_RESOURCE_GROUP_NAME_PARTIAL_RE = re.compile(r"\+([a-zA-Z0-9\-]+)(?:-Linux)?-[a-zA-Z0-9]+")
 
 class UtilizationHttpClient(InsecureHttpClient):
     SOCKET_TIMEOUT = 0.05
@@ -223,11 +224,9 @@ class AzureFunctionUtilization(CommonUtilization):
 
         if all((cloud_region, website_owner_name, azure_function_app_name)):
             if website_owner_name.endswith("-Linux"):
-                resource_group_name = re.search(r"\+([a-zA-z0-9\-]+)-[a-zA-Z0-9]+(?:-Linux)", website_owner_name).group(
-                    1
-                )
+                resource_group_name = AZURE_RESOURCE_GROUP_NAME_RE.search(website_owner_name).group(1)
             else:
-                resource_group_name = re.search(r"\+([a-zA-z0-9\-]+)-[a-zA-Z0-9]+", website_owner_name).group(1)
+                resource_group_name = AZURE_RESOURCE_GROUP_NAME_PARTIAL_RE.search(website_owner_name).group(1)
             subscription_id = re.search(r"(?:(?!\+).)*", website_owner_name).group(0)
             faas_app_name = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Web/sites/{2}".format(
                 subscription_id, resource_group_name, azure_function_app_name

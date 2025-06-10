@@ -20,6 +20,57 @@ from newrelic.api.application import application_instance
 from newrelic.api.transaction import current_transaction
 from newrelic.api.web_transaction import WebTransaction
 from newrelic.common.object_wrapper import wrap_function_wrapper
+from newrelic.common.utilization import AZURE_RESOURCE_GROUP_NAME_RE, AZURE_RESOURCE_GROUP_NAME_PARTIAL_RE
+from newrelic.common.signature import bind_args
+
+
+def force_agent_activation():
+    """
+    This function is used to force the agent to activate and register
+    the application instance with the collector instead of lazy
+    registration upon the first request.
+    """
+    app_name = os.environ.setdefault("NEW_RELIC_APP_NAME", os.getenv("WEBSITE_SITE_NAME", ""))
+    
+    application = application_instance(app_name, activate=False)
+    if application and not application.active:
+        application.activate()
+    elif not application:
+        application = application_instance(app_name)
+        application.activate()
+    
+    return application
+    # return application_instance(app_name)
+
+
+def intrinsics_populator(application, context):
+    # For now, only HTTP triggers are supported
+    trigger_type = "http"
+
+    website_owner_name = os.environ.get("WEBSITE_OWNER_NAME", None)
+    if not website_owner_name:
+        subscription_id = "Unknown"
+    else:
+        subscription_id = re.search(r"(?:(?!\+).)*", website_owner_name) and re.search(
+            r"(?:(?!\+).)*", website_owner_name
+        ).group(0)
+    if website_owner_name and website_owner_name.endswith("-Linux"):
+        resource_group_name = AZURE_RESOURCE_GROUP_NAME_RE.search(website_owner_name).group(1)
+    elif website_owner_name:
+        resource_group_name = AZURE_RESOURCE_GROUP_NAME_PARTIAL_RE.search(website_owner_name).group(1)
+    else:
+        resource_group_name = os.environ.get("WEBSITE_RESOURCE_GROUP", "Unknown")
+    azure_function_app_name = os.environ.get("WEBSITE_SITE_NAME", application.name)
+
+    cloud_resource_id = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Web/sites/{azure_function_app_name}/functions/{context.function_name}"
+    faas_name = f"{azure_function_app_name}/{context.function_name}"
+
+    return {
+        "cloud.resource_id": cloud_resource_id,
+        "faas.name": faas_name,
+        "faas.trigger": trigger_type,
+        "faas.invocation_id": context.invocation_id,
+    }
 
 
 # TODO: This should serve as a way to determine the trigger type.
@@ -27,18 +78,8 @@ from newrelic.common.object_wrapper import wrap_function_wrapper
 # the application if not already registered with the collector as well
 # as determining if this invocation was a cold start or not.
 async def wrap_dispatcher__handle__invocation_request(wrapped, instance, args, kwargs):
-    def bind_params(request, *args, **kwargs):
-        return request
 
-    # Force default registration of the application instance
-    # instead of lazy registration upon the first request
-    app_name = os.environ.get("NEW_RELIC_APP_NAME", os.environ.get("WEBSITE_SITE_NAME", None))
-    application = application_instance(app_name, activate=False)
-    if application and not application.active:
-        application.activate()
-    elif not application:
-        application = application_instance(app_name)
-        application.activate()
+    force_agent_activation()
 
     # Logic to determine if this is a cold start since we are not
     # able to access the logic in the __init__ method of the Dispatcher
@@ -47,7 +88,9 @@ async def wrap_dispatcher__handle__invocation_request(wrapped, instance, args, k
         instance._nr_running_dispatcher = True
         instance._nr_cold_start = True
 
-    request = bind_params(*args, **kwargs)
+    bound_args = bind_args(wrapped, args, kwargs)
+
+    request = bound_args.get("request", None)
 
     if not request:
         return await wrapped(*args, **kwargs)
@@ -65,30 +108,22 @@ async def wrap_dispatcher__handle__invocation_request(wrapped, instance, args, k
 async def wrap_dispatcher__run_async_func(wrapped, instance, args, kwargs):
     from azure.functions.http import HttpRequest
 
-    def bind_params(context, func, args, *_args, **_kwargs):
-        return context, func, args
+    bound_args = bind_args(wrapped, args, kwargs)
 
-    context, func, params = bind_params(*args, **kwargs)
+    context = bound_args.get("context", None)
+    func = bound_args.get("func", None)
+    params = bound_args.get("args", None)
 
-    application = application_instance(
-        os.environ.get("NEW_RELIC_APP_NAME", os.environ.get("WEBSITE_SITE_NAME", None)), activate=False
-    )
-    if application and not application.active:
-        application.activate()
-    elif not application:
-        application = application_instance(
-            os.environ.get("NEW_RELIC_APP_NAME", os.environ.get("WEBSITE_SITE_NAME", None))
-        )
-        application.activate()
+    application = force_agent_activation()
 
     http_request = None
-    for key, value in params.items():
+    for value in params.values():
         if isinstance(value, HttpRequest):
             http_request = value
-            url_split = urlparse.urlsplit(http_request.url)
-            scheme = url_split.scheme
-            query = url_split.query
-            host, port = url_split.netloc, None if (":" not in url_split.netloc) else url_split.netloc.split(":")
+            url_split = urlparse.urlsplit(getattr(http_request, "url", ":///?#"))
+            scheme = getattr(url_split, "scheme", None)
+            query = getattr(url_split, "query", None)
+            host, port = (getattr(url_split, "netloc", None), None) if (":" not in getattr(url_split, "netloc", None)) else getattr(url_split, "netloc", None).split(":")
             break
 
     # If this is an HTTP http_request object, create a web transaction.
@@ -108,8 +143,8 @@ async def wrap_dispatcher__run_async_func(wrapped, instance, args, kwargs):
             source=func,
         )
 
-        # For now, only HTTP triggers are supported
-        trigger_type = "http"
+        if not transaction:
+            return await wrapped(*args, **kwargs)
 
         if hasattr(instance, "_nr_cold_start"):
             cold_start = True
@@ -119,39 +154,11 @@ async def wrap_dispatcher__run_async_func(wrapped, instance, args, kwargs):
         else:
             cold_start = False
 
-        website_owner_name = os.environ.get("WEBSITE_OWNER_NAME", None)
-        if not website_owner_name:
-            subscription_id = "Unknown"
-        else:
-            subscription_id = re.search(r"(?:(?!\+).)*", website_owner_name) and re.search(
-                r"(?:(?!\+).)*", website_owner_name
-            ).group(0)
-        if website_owner_name and website_owner_name.endswith("-Linux"):
-            resource_group_name = re.search(r"\+([a-zA-z0-9\-]+)-[a-zA-Z0-9]+(?:-Linux)", website_owner_name).group(
-                1
-            )
-        elif website_owner_name:
-            resource_group_name = re.search(r"\+([a-zA-z0-9\-]+)-[a-zA-Z0-9]+", website_owner_name).group(1)
-        else:
-            resource_group_name = os.environ.get("WEBSITE_RESOURCE_GROUP", "Unknown")
-        azure_function_app_name = os.environ.get("WEBSITE_SITE_NAME", application.name)
-
-        cloud_resource_id = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Web/sites/{azure_function_app_name}/functions/{context.function_name}"
-        faas_name = f"{azure_function_app_name}/{context.function_name}"
-
-        azure_intrinsics = {
-            "cloud.resource_id": cloud_resource_id,
-            "faas.name": faas_name,
-            "faas.trigger": trigger_type,
-            "faas.invocation_id": context.invocation_id,
-        }
+        azure_intrinsics = intrinsics_populator(application, context)
 
         # Only add this attribute if this is a cold start
         if cold_start:
             azure_intrinsics.update({"faas.coldStart": True})
-
-        if not transaction:
-            return await wrapped(*args, **kwargs)
 
         with transaction:
             for key, value in azure_intrinsics.items():
@@ -165,29 +172,22 @@ async def wrap_dispatcher__run_async_func(wrapped, instance, args, kwargs):
 def wrap_dispatcher__run_sync_func(wrapped, instance, args, kwargs):
     from azure.functions.http import HttpRequest
 
-    def bind_params(invocation_id, context, func, params, *args, **kwargs):
-        return invocation_id, context, func, params
+    bound_args = bind_args(wrapped, args, kwargs)
 
-    invocation_id, context, func, params = bind_params(*args, **kwargs)
-    application = application_instance(
-        os.environ.get("NEW_RELIC_APP_NAME", os.environ.get("WEBSITE_SITE_NAME", None)), activate=False
-    )
-    if application and not application.active:
-        application.activate()
-    elif not application:
-        application = application_instance(
-            os.environ.get("NEW_RELIC_APP_NAME", os.environ.get("WEBSITE_SITE_NAME", None))
-        )
-        application.activate()
+    context = bound_args.get("context", None)
+    func = bound_args.get("func", None)
+    params = bound_args.get("params", None)
+    
+    application = force_agent_activation()
 
     http_request = None
-    for key, value in params.items():
+    for value in params.values():
         if isinstance(value, HttpRequest):
             http_request = value
-            url_split = urlparse.urlsplit(http_request.url)
-            scheme = url_split.scheme
-            query = url_split.query
-            host, port = url_split.netloc, None if (":" not in url_split.netloc) else url_split.netloc.split(":")
+            url_split = urlparse.urlsplit(getattr(http_request, "url", ":///?#"))
+            scheme = getattr(url_split, "scheme", None)
+            query = getattr(url_split, "query", None)
+            host, port = (getattr(url_split, "netloc", None), None) if (":" not in getattr(url_split, "netloc", None)) else getattr(url_split, "netloc", None).split(":")
             break
 
     # If this is an HTTP Request object, we can create a web transaction
@@ -206,8 +206,8 @@ def wrap_dispatcher__run_sync_func(wrapped, instance, args, kwargs):
             source=func,
         )
 
-        # For now, only HTTP triggers are supported
-        trigger_type = "http"
+        if not transaction:
+            return wrapped(*args, **kwargs)
 
         if hasattr(instance, "_nr_cold_start"):
             cold_start = True
@@ -217,41 +217,11 @@ def wrap_dispatcher__run_sync_func(wrapped, instance, args, kwargs):
         else:
             cold_start = False
 
-        website_owner_name = os.environ.get("WEBSITE_OWNER_NAME", None)
-        if not website_owner_name:
-            subscription_id = "Unknown"
-        else:
-            subscription_id = re.search(r"(?:(?!\+).)*", website_owner_name) and re.search(
-                r"(?:(?!\+).)*", website_owner_name
-            ).group(0)
-        if website_owner_name and website_owner_name.endswith("-Linux"):
-            resource_group_name = re.search(r"\+([a-zA-z0-9\-]+)-[a-zA-Z0-9]+(?:-Linux)", website_owner_name).group(
-                1
-            )
-        elif website_owner_name:
-            resource_group_name = re.search(r"\+([a-zA-z0-9\-]+)-[a-zA-Z0-9]+", website_owner_name).group(1)
-        else:
-            resource_group_name = os.environ.get("WEBSITE_RESOURCE_GROUP", "Unknown")
-            
-        azure_function_app_name = os.environ.get("WEBSITE_SITE_NAME", application.name)
-
-        cloud_resource_id = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Web/sites/{azure_function_app_name}/functions/{context.function_name}"
-        faas_name = f"{azure_function_app_name}/{context.function_name}"
-
-        azure_intrinsics = {
-            "cloud.resource_id": cloud_resource_id,
-            "faas.name": faas_name,
-            "faas.trigger": trigger_type,
-            "faas.invocation_id": invocation_id,
-        }
+        azure_intrinsics = intrinsics_populator(application, context)
 
         # Only add this attribute if this is a cold start
         if cold_start:
             azure_intrinsics.update({"faas.coldStart": True})
-
-        if not transaction:
-            response = wrapped(*args, **kwargs)
-            return response
 
         with transaction:
             for key, value in azure_intrinsics.items():
@@ -264,16 +234,16 @@ def wrap_dispatcher__run_sync_func(wrapped, instance, args, kwargs):
 
 
 def wrap_httpresponse__init__(wrapped, instance, args, kwargs):
-    def bind_params(body=b"", status_code=None, headers=None, *args, **kwargs):
-        return status_code, headers
 
     transaction = current_transaction()
     if not transaction:
-        response = wrapped(*args, **kwargs)
-        return response
+        return wrapped(*args, **kwargs)
 
-    status_code, headers = bind_params(*args, **kwargs)
+    bound_args = bind_args(wrapped, args, kwargs)
 
+    status_code = bound_args.get("status_code", None)
+    headers = bound_args.get("headers", None)
+    
     if status_code:
         transaction.process_response(status_code, headers)
 
