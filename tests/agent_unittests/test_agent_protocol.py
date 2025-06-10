@@ -78,7 +78,7 @@ def clear_sent_values():
 
 @pytest.fixture(autouse=True)
 def override_utilization(monkeypatch):
-    global AWS, AZURE, ECS, GCP, PCF, DOCKER, KUBERNETES, AZUREFUNCTION
+    global AWS, AZURE, ECS, GCP, PCF, BOOT_ID, DOCKER, KUBERNETES, AZUREFUNCTION
     AWS = {"id": "foo", "type": "bar", "zone": "baz"}
     AZURE = {"location": "foo", "name": "bar", "vmId": "baz", "vmSize": "boo"}
     ECS = {"ecsDockerId": "foobar"}
