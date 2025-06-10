@@ -566,8 +566,6 @@ class Transaction:
             for ml_model, version in self._ml_models:
                 self.record_custom_metric(f"Supportability/Python/ML/{ml_model}/{version}", 1)
 
-        if os.environ.get("FUNCTIONS_WORKER_RUNTIME", None):
-            self.record_custom_metric("Supportability/Python/AzureFunctionMode/Enabled", 1)
 
         if self._settings.distributed_tracing.enabled:
             # Sampled and priority need to be computed at the end of the
