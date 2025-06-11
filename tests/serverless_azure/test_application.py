@@ -36,7 +36,7 @@ def azure_end(process):
 
 def test_ping():
     # Start the Azure Function app
-    process = azure_start()
+    #process = azure_start()
 
     # Wait until the connection is established before making the request.
     for _ in range(50):
@@ -56,5 +56,5 @@ def test_ping():
     assert response.text == "Hello, Reli!"
     assert response.headers["Content-Type"] == "text/plain"
         
-    azure_end(process)
+    #azure_end(process)
 
