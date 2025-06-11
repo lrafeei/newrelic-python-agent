@@ -1519,7 +1519,7 @@ jobs:
         run: |
           func start &
           tox -vv -e ${{ steps.get-envs.outputs.envs }} -p auto
-        working-directory: $GITHUB_WORKSPACE/tests/serverless_azure/sample_application/
+        working-directory: tests/serverless_azure/sample_application/
         env:
           TOX_PARALLEL_NO_SPINNER: 1
           PY_COLORS: 0
