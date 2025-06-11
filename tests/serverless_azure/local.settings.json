@@ -5,6 +5,10 @@
 		"PYTHON_ENABLE_WORKER_EXTENSIONS": true,
 		"WEBSITE_OWNER_NAME": "b888887b-cb91-49e0-b911-c9177372bdba+testing-rg-EastUS2webspace-Linux",
 		"REGION_NAME": "East US 2",
-		"AzureWebJobsStorage": "UseDevelopmentStorage=true"
+		"AzureWebJobsStorage": "UseDevelopmentStorage=true",
+		"AzureWebJobsFeatureFlags": "DisableDiagnosticEventLogging"
+	},
+	"Host": {
+		"CORS": "*"
 	}
 }
