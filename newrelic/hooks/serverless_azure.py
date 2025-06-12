@@ -26,7 +26,6 @@ from newrelic.common.signature import bind_args
 
 def original_agent_instance():
     app_name = os.environ.setdefault("NEW_RELIC_APP_NAME", os.getenv("WEBSITE_SITE_NAME", ""))
-
     return application_instance(app_name)
 
 
