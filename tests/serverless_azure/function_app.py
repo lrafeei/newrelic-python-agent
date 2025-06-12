@@ -17,7 +17,7 @@ import os
 
 newrelic.agent.initialize()  # Initialize the New Relic agent
 os.environ["NEW_RELIC_APP_NAME"] = app_name = "Python Agent Test (serverless_azure)"
-application = newrelic.agent.register_application(app_name, timeout=30.0)
+application = newrelic.agent.register_application(app_name, timeout=20.0)
 
 import azure.functions as func  # noqa: E402; pylint: disable=E0401
 
