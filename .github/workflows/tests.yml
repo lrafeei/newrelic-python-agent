@@ -1486,9 +1486,6 @@ jobs:
       image: ghcr.io/newrelic/newrelic-python-agent-ci:latest
       options: >-
         --add-host=host.docker.internal:host-gateway
-      ports:
-        8080:7071
-        8081:7071
     timeout-minutes: 30
 
     steps:
