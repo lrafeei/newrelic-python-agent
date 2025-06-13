@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import newrelic.agent
 import os
+os.environ["PYTHONPATH"] = f"{os.environ['PYTHONPATH']}/:{os.environ['PACKAGES_DIR']}"
+
+import newrelic.agent
 import azure.functions as func  
 
 newrelic.agent.initialize()  # Initialize the New Relic agent
@@ -21,7 +23,7 @@ os.environ["NEW_RELIC_APP_NAME"] = app_name = "Python Agent Test (serverless_azu
 application = newrelic.agent.register_application(app_name, timeout=20.0)
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
-
+print(f"PYTHONPATH IN FUNCTION_APP: {os.environ['PYTHONPATH']}")
 
 @app.function_name(name="HttpTriggerBasic")
 @app.route(route="basic")
