@@ -1486,10 +1486,13 @@ jobs:
       image: ghcr.io/newrelic/newrelic-python-agent-ci:latest
       options: >-
         --add-host=host.docker.internal:host-gateway
+      ports:
+        8080:7071
+        8081:7071
     timeout-minutes: 30
 
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # 4.1.1
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # 4.2.2
 
       - name: Install azure-core-tools
         run: |
@@ -1523,9 +1526,11 @@ jobs:
           PY_COLORS: 0
 
       - name: Upload Coverage Artifacts
-        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bb5c2f3 # 4.3.1
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # 4.6.2
         with:
           name: coverage-${{ github.job }}-${{ strategy.job-index }}
           path: ./**/.coverage.*
+          include-hidden-files: true
+          if-no-files-found: error
           retention-days: 1
 
